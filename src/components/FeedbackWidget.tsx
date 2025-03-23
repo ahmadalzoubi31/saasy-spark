@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,10 +24,10 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
   const [loading, setLoading] = useState(false);
 
   const positionClasses = {
-    "bottom-right": "bottom-4 right-4",
-    "bottom-left": "bottom-4 left-4",
-    "top-right": "top-4 right-4",
-    "top-left": "top-4 left-4",
+    "bottom-right": "absolute bottom-4 right-4",
+    "bottom-left": "absolute bottom-4 left-4",
+    "top-right": "absolute top-4 right-4",
+    "top-left": "absolute top-4 left-4",
   };
 
   const handleSubmit = () => {
@@ -89,7 +88,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
   };
 
   return (
-    <div className={cn("fixed z-50", positionClasses[position])}>
+    <div className={cn("z-50", positionClasses[position])}>
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}

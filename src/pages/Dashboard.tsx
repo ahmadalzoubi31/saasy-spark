@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -685,12 +686,15 @@ const Dashboard = () => {
                         </Button>
                       </div>
                       <div className="p-8 flex items-center justify-center h-[400px] relative">
-                        <FeedbackWidget 
-                          key={refreshKey}
-                          position={widgetSettings.position}
-                          productName={widgetSettings.productName}
-                          darkMode={widgetSettings.darkMode}
-                        />
+                        {/* The key change is here - we're adding position:relative to this div */}
+                        <div className="w-full h-full relative">
+                          <FeedbackWidget 
+                            key={refreshKey}
+                            position={widgetSettings.position}
+                            productName={widgetSettings.productName}
+                            darkMode={widgetSettings.darkMode}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
