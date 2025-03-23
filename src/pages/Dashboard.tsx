@@ -10,6 +10,7 @@ import PageTransition from "@/components/layout/PageTransition";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from "recharts";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import { toast } from "sonner";
 
 const data = [
   { name: "Jan", value: 25 },
@@ -72,6 +73,14 @@ const feedbackData = [
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   
+  const [widgetSettings, setWidgetSettings] = useState({
+    productName: "Feedback SaaS",
+    position: "bottom-right" as "bottom-right" | "bottom-left" | "top-right" | "top-left",
+    darkMode: false,
+  });
+  
+  const [refreshKey, setRefreshKey] = useState(0);
+  
   const StatusBadge = ({ status }: { status: string }) => {
     const getStatusColor = () => {
       switch (status) {
@@ -118,6 +127,26 @@ const Dashboard = () => {
         ))}
       </div>
     );
+  };
+
+  const handleWidgetSettingChange = (
+    field: keyof typeof widgetSettings,
+    value: string | boolean
+  ) => {
+    setWidgetSettings((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+  
+  const handleSaveWidgetSettings = () => {
+    setRefreshKey((prev) => prev + 1);
+    toast.success("Widget settings saved successfully");
+  };
+  
+  const handleRefreshWidget = () => {
+    setRefreshKey((prev) => prev + 1);
+    toast.success("Widget refreshed");
   };
 
   return (
@@ -225,7 +254,6 @@ const Dashboard = () => {
             </div>
             
             <TabsContent value="overview" className="space-y-8">
-              {/* Stats Cards */}
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="glass-panel-sm">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -343,7 +371,6 @@ const Dashboard = () => {
                 </Card>
               </div>
               
-              {/* Charts */}
               <div className="grid gap-6 md:grid-cols-2">
                 <Card className="glass-panel-sm">
                   <CardHeader>
@@ -428,7 +455,6 @@ const Dashboard = () => {
                 </Card>
               </div>
               
-              {/* Recent Feedback */}
               <Card className="glass-panel-sm">
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -576,7 +602,8 @@ const Dashboard = () => {
                             <Input
                               id="product-name"
                               placeholder="My Product"
-                              defaultValue="Feedback SaaS"
+                              value={widgetSettings.productName}
+                              onChange={(e) => handleWidgetSettingChange("productName", e.target.value)}
                             />
                           </div>
                           
@@ -585,7 +612,8 @@ const Dashboard = () => {
                             <select
                               id="widget-position"
                               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              defaultValue="bottom-right"
+                              value={widgetSettings.position}
+                              onChange={(e) => handleWidgetSettingChange("position", e.target.value as any)}
                             >
                               <option value="bottom-right">Bottom Right</option>
                               <option value="bottom-left">Bottom Left</option>
@@ -599,6 +627,8 @@ const Dashboard = () => {
                               type="checkbox"
                               id="dark-mode"
                               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              checked={widgetSettings.darkMode}
+                              onChange={(e) => handleWidgetSettingChange("darkMode", e.target.checked)}
                             />
                             <Label htmlFor="dark-mode">Enable Dark Mode</Label>
                           </div>
@@ -623,6 +653,7 @@ const Dashboard = () => {
                               navigator.clipboard.writeText(
                                 `<script src="https://feedback-saas.com/widget.js?api_key=YOUR_API_KEY"></script>`
                               );
+                              toast.success("Code copied to clipboard");
                             }}
                           >
                             <svg
@@ -643,18 +674,23 @@ const Dashboard = () => {
                         </div>
                       </div>
                       
-                      <Button className="w-full">Save Changes</Button>
+                      <Button className="w-full" onClick={handleSaveWidgetSettings}>Save Changes</Button>
                     </div>
                     
                     <div className="border rounded-xl overflow-hidden bg-white">
                       <div className="p-4 border-b bg-muted/30 flex items-center justify-between">
                         <h3 className="font-medium">Widget Preview</h3>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={handleRefreshWidget}>
                           Refresh
                         </Button>
                       </div>
                       <div className="p-8 flex items-center justify-center h-[400px] relative">
-                        <FeedbackWidget position="bottom-right" productName="Feedback SaaS" />
+                        <FeedbackWidget 
+                          key={refreshKey}
+                          position={widgetSettings.position}
+                          productName={widgetSettings.productName}
+                          darkMode={widgetSettings.darkMode}
+                        />
                       </div>
                     </div>
                   </div>
@@ -771,4 +807,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
