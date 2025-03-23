@@ -7,11 +7,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import PageTransition from "@/components/layout/PageTransition";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from "recharts";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const data = [
   { name: "Jan", value: 25 },
@@ -82,6 +92,12 @@ const Dashboard = () => {
   
   const [refreshKey, setRefreshKey] = useState(0);
   
+  // Add new state for feedback data management
+  const [managedFeedbackData, setManagedFeedbackData] = useState(feedbackData);
+  const [replyDialogOpen, setReplyDialogOpen] = useState(false);
+  const [currentFeedback, setCurrentFeedback] = useState<typeof feedbackData[0] | null>(null);
+  const [replyText, setReplyText] = useState("");
+  
   const StatusBadge = ({ status }: { status: string }) => {
     const getStatusColor = () => {
       switch (status) {
@@ -148,6 +164,52 @@ const Dashboard = () => {
   const handleRefreshWidget = () => {
     setRefreshKey((prev) => prev + 1);
     toast.success("Widget refreshed");
+  };
+  
+  // New function to handle opening the reply dialog
+  const handleReplyClick = (feedback: typeof feedbackData[0]) => {
+    setCurrentFeedback(feedback);
+    setReplyText("");
+    setReplyDialogOpen(true);
+  };
+  
+  // New function to handle sending the reply
+  const handleSendReply = () => {
+    if (!currentFeedback || !replyText.trim()) {
+      toast.error("Please enter a reply message");
+      return;
+    }
+    
+    // In a real app, we would send this to an API
+    // For now, we'll just show a success message
+    toast.success(`Reply sent to ${currentFeedback.name}`);
+    
+    // Update the feedback status to "In Progress" if it was "New"
+    if (currentFeedback.status === "New") {
+      setManagedFeedbackData(prevData => 
+        prevData.map(item => 
+          item.id === currentFeedback.id 
+            ? { ...item, status: "In Progress" } 
+            : item
+        )
+      );
+    }
+    
+    setReplyDialogOpen(false);
+    setReplyText("");
+  };
+  
+  // New function to handle marking feedback as resolved
+  const handleMarkAsResolved = (feedbackId: number) => {
+    setManagedFeedbackData(prevData => 
+      prevData.map(item => 
+        item.id === feedbackId 
+          ? { ...item, status: "Resolved" } 
+          : item
+      )
+    );
+    
+    toast.success("Feedback marked as resolved");
   };
 
   return (
@@ -544,7 +606,7 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {feedbackData.map((feedback) => (
+                    {managedFeedbackData.map((feedback) => (
                       <div
                         key={feedback.id}
                         className="flex flex-col space-y-3 border-b pb-6 last:border-0 last:pb-0"
@@ -569,10 +631,20 @@ const Dashboard = () => {
                         </div>
                         <p className="text-sm">{feedback.message}</p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleReplyClick(feedback)}
+                            disabled={feedback.status === "Resolved"}
+                          >
                             Reply
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleMarkAsResolved(feedback.id)}
+                            disabled={feedback.status === "Resolved"}
+                          >
                             Mark as Resolved
                           </Button>
                         </div>
@@ -806,6 +878,39 @@ const Dashboard = () => {
           </Tabs>
         </main>
       </div>
+      
+      <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reply to {currentFeedback?.name}</DialogTitle>
+            <DialogDescription>
+              Send a direct response to this feedback.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="feedback-message" className="text-sm font-medium">Original message:</Label>
+              <div className="p-3 bg-muted rounded-md text-sm">
+                {currentFeedback?.message}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="reply-message" className="text-sm font-medium">Your reply</Label>
+              <Textarea
+                id="reply-message"
+                placeholder="Type your response here..."
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReplyDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendReply}>Send Reply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   );
 };
