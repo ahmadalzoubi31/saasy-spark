@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/layout/PageTransition";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from "recharts";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 const data = [
   { name: "Jan", value: 25 },
@@ -458,7 +459,7 @@ const Dashboard = () => {
                               <p className="text-xs text-muted-foreground">{feedback.date}</p>
                             </div>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex items-center gap-2">
                             <RatingStars rating={feedback.rating} />
                             <StatusBadge status={feedback.status} />
                           </div>
@@ -770,3 +771,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
