@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from "recharts";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Feedback, FeedbackReply } from "@/types/feedback";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +24,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const data = [
   { name: "Jan", value: 25 },
@@ -30,54 +42,6 @@ const data = [
   { name: "May", value: 55 },
   { name: "Jun", value: 65 },
   { name: "Jul", value: 75 },
-];
-
-const feedbackData = [
-  {
-    id: 1,
-    name: "Emma Thompson",
-    email: "emma@example.com",
-    message: "The new dashboard layout is much more intuitive, love it!",
-    rating: 5,
-    date: "2023-07-15",
-    status: "New",
-  },
-  {
-    id: 2,
-    name: "Michael Rodriguez",
-    email: "michael@example.com",
-    message: "Navigation is still a bit confusing. Takes too many clicks to find settings.",
-    rating: 3,
-    date: "2023-07-14",
-    status: "Reviewed",
-  },
-  {
-    id: 3,
-    name: "Sophia Chen",
-    email: "sophia@example.com",
-    message: "The mobile app crashes when I try to upload multiple images at once.",
-    rating: 2,
-    date: "2023-07-13",
-    status: "In Progress",
-  },
-  {
-    id: 4,
-    name: "James Wilson",
-    email: "james@example.com",
-    message: "Customer support was incredibly helpful and solved my issue quickly!",
-    rating: 5,
-    date: "2023-07-12",
-    status: "Resolved",
-  },
-  {
-    id: 5,
-    name: "Olivia Davis",
-    email: "olivia@example.com",
-    message: "Great product overall, but would love to see more integration options.",
-    rating: 4,
-    date: "2023-07-11",
-    status: "New",
-  },
 ];
 
 const Dashboard = () => {
@@ -91,14 +55,54 @@ const Dashboard = () => {
   
   const [refreshKey, setRefreshKey] = useState(0);
   
-  const [managedFeedbackData, setManagedFeedbackData] = useState(feedbackData);
+  const [feedbackData, setFeedbackData] = useState<Feedback[]>([]);
+  const [feedbackReplies, setFeedbackReplies] = useState<FeedbackReply[]>([]);
+  const [loading, setLoading] = useState(true);
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
-  const [currentFeedback, setCurrentFeedback] = useState<typeof feedbackData[0] | null>(null);
+  const [currentFeedback, setCurrentFeedback] = useState<Feedback | null>(null);
   const [replyText, setReplyText] = useState("");
 
-  const StatusBadge = ({ status }: { status: string }) => {
+  // Fetch feedback data
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      setLoading(true);
+      try {
+        const { data: feedback, error } = await supabase
+          .from('feedback')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        const { data: replies, error: repliesError } = await supabase
+          .from('feedback_replies')
+          .select('*');
+          
+        if (repliesError) throw repliesError;
+        
+        setFeedbackData(feedback || []);
+        setFeedbackReplies(replies || []);
+      } catch (error) {
+        console.error('Error fetching feedback:', error);
+        toast.error('Failed to load feedback data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchFeedback();
+  }, []);
+
+  const StatusBadge = ({ status, replies }: { status: string, replies: FeedbackReply[] }) => {
+    // If there are replies, mark it as "In Progress" or "Resolved" based on status
+    let displayStatus = status;
+    
+    if (replies && replies.length > 0 && status === "New") {
+      displayStatus = "In Progress";
+    }
+    
     const getStatusColor = () => {
-      switch (status) {
+      switch (displayStatus) {
         case "New":
           return "bg-blue-100 text-blue-700";
         case "Reviewed":
@@ -114,7 +118,7 @@ const Dashboard = () => {
     
     return (
       <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-medium", getStatusColor())}>
-        {status}
+        {displayStatus}
       </span>
     );
   };
@@ -164,44 +168,73 @@ const Dashboard = () => {
     toast.success("Widget refreshed");
   };
   
-  const handleReplyClick = (feedback: typeof feedbackData[0]) => {
+  const handleReplyClick = (feedback: Feedback) => {
     setCurrentFeedback(feedback);
     setReplyText("");
     setReplyDialogOpen(true);
   };
   
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!currentFeedback || !replyText.trim()) {
       toast.error("Please enter a reply message");
       return;
     }
     
-    toast.success(`Reply sent to ${currentFeedback.name}`);
-    
-    if (currentFeedback.status === "New") {
-      setManagedFeedbackData(prevData => 
-        prevData.map(item => 
-          item.id === currentFeedback.id 
-            ? { ...item, status: "In Progress" } 
-            : item
-        )
-      );
+    try {
+      // Save reply to database
+      const { data, error } = await supabase
+        .from('feedback_replies')
+        .insert({
+          feedback_id: currentFeedback.id,
+          message: replyText
+        })
+        .select();
+        
+      if (error) throw error;
+      
+      // Update local state with new reply
+      if (data && data.length > 0) {
+        setFeedbackReplies(prev => [...prev, data[0]]);
+      }
+      
+      toast.success(`Reply sent to ${currentFeedback.first_name}`);
+      setReplyDialogOpen(false);
+      setReplyText("");
+      
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast.error('Failed to send reply');
     }
-    
-    setReplyDialogOpen(false);
-    setReplyText("");
   };
   
-  const handleMarkAsResolved = (feedbackId: number) => {
-    setManagedFeedbackData(prevData => 
-      prevData.map(item => 
-        item.id === feedbackId 
-          ? { ...item, status: "Resolved" } 
-          : item
-      )
-    );
-    
-    toast.success("Feedback marked as resolved");
+  const handleMarkAsResolved = async (feedbackId: string) => {
+    try {
+      // In a real application, you would update a status field in the feedback table
+      // For now, we'll just add a "Resolved" reply
+      const { data, error } = await supabase
+        .from('feedback_replies')
+        .insert({
+          feedback_id: feedbackId,
+          message: "This issue has been marked as resolved."
+        })
+        .select();
+        
+      if (error) throw error;
+      
+      // Update local state with new reply
+      if (data && data.length > 0) {
+        setFeedbackReplies(prev => [...prev, data[0]]);
+      }
+      
+      toast.success("Feedback marked as resolved");
+    } catch (error) {
+      console.error('Error marking as resolved:', error);
+      toast.error('Failed to mark as resolved');
+    }
+  };
+
+  const getFeedbackReplies = (feedbackId: string) => {
+    return feedbackReplies.filter(reply => reply.feedback_id === feedbackId);
   };
 
   const getWidgetInstallationCode = () => {
@@ -212,6 +245,18 @@ const Dashboard = () => {
   data-dark-mode="${widgetSettings.darkMode}"
   data-product-name="${widgetSettings.productName}">
 </script>`;
+  };
+
+  // Format date to a more readable format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -341,7 +386,7 @@ const Dashboard = () => {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">238</div>
+                    <div className="text-2xl font-bold">{feedbackData.length}</div>
                     <p className="text-xs text-muted-foreground mt-1">
                       <span className="text-green-500 font-medium">+12.4%</span>{" "}
                       from last month
@@ -370,9 +415,15 @@ const Dashboard = () => {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">4.7</div>
+                    <div className="text-2xl font-bold">
+                      {feedbackData.length > 0 
+                        ? (feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length).toFixed(1) 
+                        : "N/A"}
+                    </div>
                     <div className="flex mt-1">
-                      <RatingStars rating={4.7} />
+                      <RatingStars rating={feedbackData.length > 0 
+                        ? Math.round(feedbackData.reduce((sum, item) => sum + item.rating, 0) / feedbackData.length)
+                        : 0} />
                     </div>
                   </CardContent>
                 </Card>
@@ -398,7 +449,13 @@ const Dashboard = () => {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">87%</div>
+                    <div className="text-2xl font-bold">
+                      {feedbackData.length > 0 
+                        ? `${Math.round((feedbackData.filter(f => 
+                            feedbackReplies.some(r => r.feedback_id === f.id)
+                          ).length / feedbackData.length) * 100)}%` 
+                        : "N/A"}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       <span className="text-green-500 font-medium">+3.2%</span>{" "}
                       from last month
@@ -427,7 +484,9 @@ const Dashboard = () => {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">1,293</div>
+                    <div className="text-2xl font-bold">
+                      {new Set(feedbackData.map(f => f.email)).size}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       <span className="text-green-500 font-medium">+15.3%</span>{" "}
                       from last month
@@ -486,11 +545,11 @@ const Dashboard = () => {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart
                         data={[
-                          { rating: "5 ★", count: 45 },
-                          { rating: "4 ★", count: 32 },
-                          { rating: "3 ★", count: 18 },
-                          { rating: "2 ★", count: 10 },
-                          { rating: "1 ★", count: 5 },
+                          { rating: "5 ★", count: feedbackData.filter(f => f.rating === 5).length || 0 },
+                          { rating: "4 ★", count: feedbackData.filter(f => f.rating === 4).length || 0 },
+                          { rating: "3 ★", count: feedbackData.filter(f => f.rating === 3).length || 0 },
+                          { rating: "2 ★", count: feedbackData.filter(f => f.rating === 2).length || 0 },
+                          { rating: "1 ★", count: feedbackData.filter(f => f.rating === 1).length || 0 },
                         ]}
                       >
                         <XAxis 
@@ -532,33 +591,67 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {feedbackData.slice(0, 3).map((feedback) => (
-                      <div
-                        key={feedback.id}
-                        className="flex flex-col space-y-2 border-b pb-4 last:border-0 last:pb-0"
+                  {loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <svg
+                        className="animate-spin h-8 w-8 text-primary"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback>
-                                {feedback.name.split(" ").map((n) => n[0]).join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">{feedback.name}</p>
-                              <p className="text-xs text-muted-foreground">{feedback.date}</p>
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    </div>
+                  ) : feedbackData.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No feedback received yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {feedbackData.slice(0, 3).map((feedback) => {
+                        const replies = getFeedbackReplies(feedback.id);
+                        const status = replies.length > 0 ? "In Progress" : "New";
+                        
+                        return (
+                          <div
+                            key={feedback.id}
+                            className="flex flex-col space-y-2 border-b pb-4 last:border-0 last:pb-0"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback>
+                                    {feedback.first_name.charAt(0) + feedback.last_name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{feedback.first_name} {feedback.last_name}</p>
+                                  <p className="text-xs text-muted-foreground">{formatDate(feedback.created_at)}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <RatingStars rating={feedback.rating} />
+                                <StatusBadge status={status} replies={replies} />
+                              </div>
                             </div>
+                            <p className="text-sm">{feedback.feedback}</p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <RatingStars rating={feedback.rating} />
-                            <StatusBadge status={feedback.status} />
-                          </div>
-                        </div>
-                        <p className="text-sm">{feedback.message}</p>
-                      </div>
-                    ))}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -607,52 +700,98 @@ const Dashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {managedFeedbackData.map((feedback) => (
-                      <div
-                        key={feedback.id}
-                        className="flex flex-col space-y-3 border-b pb-6 last:border-0 last:pb-0"
+                  {loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <svg
+                        className="animate-spin h-8 w-8 text-primary"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
                       >
-                        <div className="flex justify-between items-start flex-wrap gap-2">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarFallback>
-                                {feedback.name.split(" ").map((n) => n[0]).join("")}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{feedback.name}</p>
-                              <p className="text-sm text-muted-foreground">{feedback.email}</p>
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    </div>
+                  ) : feedbackData.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No feedback received yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {feedbackData.map((feedback) => {
+                        const replies = getFeedbackReplies(feedback.id);
+                        const status = replies.length > 0 ? "In Progress" : "New";
+                        
+                        return (
+                          <div
+                            key={feedback.id}
+                            className="flex flex-col space-y-3 border-b pb-6 last:border-0 last:pb-0"
+                          >
+                            <div className="flex justify-between items-start flex-wrap gap-2">
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarFallback>
+                                    {feedback.first_name.charAt(0) + feedback.last_name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{feedback.first_name} {feedback.last_name}</p>
+                                  <p className="text-sm text-muted-foreground">{feedback.email}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <RatingStars rating={feedback.rating} />
+                                <StatusBadge status={status} replies={replies} />
+                                <span className="text-xs text-muted-foreground">{formatDate(feedback.created_at)}</span>
+                              </div>
+                            </div>
+                            <p className="text-sm">{feedback.feedback}</p>
+                            
+                            {/* Display existing replies */}
+                            {replies.length > 0 && (
+                              <div className="ml-8 mt-2 space-y-3">
+                                <h4 className="text-sm font-medium">Replies:</h4>
+                                {replies.map(reply => (
+                                  <div key={reply.id} className="bg-muted p-3 rounded-md">
+                                    <p className="text-sm">{reply.message}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{formatDate(reply.created_at)}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleReplyClick(feedback)}
+                              >
+                                Reply
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleMarkAsResolved(feedback.id)}
+                              >
+                                Mark as Resolved
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <RatingStars rating={feedback.rating} />
-                            <StatusBadge status={feedback.status} />
-                            <span className="text-xs text-muted-foreground">{feedback.date}</span>
-                          </div>
-                        </div>
-                        <p className="text-sm">{feedback.message}</p>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleReplyClick(feedback)}
-                            disabled={feedback.status === "Resolved"}
-                          >
-                            Reply
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleMarkAsResolved(feedback.id)}
-                            disabled={feedback.status === "Resolved"}
-                          >
-                            Mark as Resolved
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -881,7 +1020,7 @@ const Dashboard = () => {
       <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Reply to {currentFeedback?.name}</DialogTitle>
+            <DialogTitle>Reply to {currentFeedback?.first_name} {currentFeedback?.last_name}</DialogTitle>
             <DialogDescription>
               Send a direct response to this feedback.
             </DialogDescription>
@@ -890,7 +1029,7 @@ const Dashboard = () => {
             <div className="grid gap-2">
               <Label htmlFor="feedback-message" className="text-sm font-medium">Original message:</Label>
               <div className="p-3 bg-muted rounded-md text-sm">
-                {currentFeedback?.message}
+                {currentFeedback?.feedback}
               </div>
             </div>
             <div className="grid gap-2">
