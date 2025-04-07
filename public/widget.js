@@ -122,6 +122,10 @@
       
       let currentRating = null;
       let submitted = false;
+      let firstName = '';
+      let lastName = '';
+      let email = '';
+      let feedbackText = '';
       
       const renderPanel = () => {
         if (submitted) {
@@ -180,7 +184,25 @@
                 `).join('')}
               </div>
               
-              <textarea class="feedback-text" placeholder="Share your thoughts about our product..." style="width: 100%; min-height: 100px; padding: 10px; border-radius: 6px; margin-bottom: 15px; resize: none; border: 1px solid ${config.darkMode ? '#4b5563' : '#e5e7eb'}; background: ${config.darkMode ? '#374151' : 'white'}; color: ${config.darkMode ? 'white' : 'black'};"></textarea>
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-size: 14px; font-weight: 500; color: ${config.darkMode ? '#e5e7eb' : '#374151'};">First Name*</label>
+                <input class="first-name-input" type="text" placeholder="Your first name" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid ${config.darkMode ? '#4b5563' : '#e5e7eb'}; background: ${config.darkMode ? '#374151' : 'white'}; color: ${config.darkMode ? 'white' : 'black'};">
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-size: 14px; font-weight: 500; color: ${config.darkMode ? '#e5e7eb' : '#374151'};">Last Name*</label>
+                <input class="last-name-input" type="text" placeholder="Your last name" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid ${config.darkMode ? '#4b5563' : '#e5e7eb'}; background: ${config.darkMode ? '#374151' : 'white'}; color: ${config.darkMode ? 'white' : 'black'};">
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-size: 14px; font-weight: 500; color: ${config.darkMode ? '#e5e7eb' : '#374151'};">Email*</label>
+                <input class="email-input" type="email" placeholder="Your email address" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid ${config.darkMode ? '#4b5563' : '#e5e7eb'}; background: ${config.darkMode ? '#374151' : 'white'}; color: ${config.darkMode ? 'white' : 'black'};">
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-size: 14px; font-weight: 500; color: ${config.darkMode ? '#e5e7eb' : '#374151'};">Feedback*</label>
+                <textarea class="feedback-text" placeholder="Share your thoughts about our product..." style="width: 100%; min-height: 100px; padding: 10px; border-radius: 6px; resize: none; border: 1px solid ${config.darkMode ? '#4b5563' : '#e5e7eb'}; background: ${config.darkMode ? '#374151' : 'white'}; color: ${config.darkMode ? 'white' : 'black'};"></textarea>
+              </div>
               
               <button class="submit-btn" style="width: 100%; padding: 10px; border-radius: 6px; background-color: ${config.darkMode ? '#374151' : '#3b82f6'}; color: white; font-weight: 500;">Submit Feedback</button>
               
@@ -204,11 +226,41 @@
             });
           });
           
+          // Get input elements
+          const firstNameInput = panel.querySelector('.first-name-input');
+          const lastNameInput = panel.querySelector('.last-name-input');
+          const emailInput = panel.querySelector('.email-input');
+          const feedbackTextarea = panel.querySelector('.feedback-text');
+          
+          // Set values if they exist
+          if (firstName) firstNameInput.value = firstName;
+          if (lastName) lastNameInput.value = lastName;
+          if (email) emailInput.value = email;
+          if (feedbackText) feedbackTextarea.value = feedbackText;
+          
+          // Add input event listeners to save values
+          firstNameInput.addEventListener('input', (e) => { firstName = e.target.value; });
+          lastNameInput.addEventListener('input', (e) => { lastName = e.target.value; });
+          emailInput.addEventListener('input', (e) => { email = e.target.value; });
+          feedbackTextarea.addEventListener('input', (e) => { feedbackText = e.target.value; });
+          
           panel.querySelector('.submit-btn').addEventListener('click', () => {
-            const feedbackText = panel.querySelector('.feedback-text').value;
+            // Get values
+            firstName = panel.querySelector('.first-name-input').value;
+            lastName = panel.querySelector('.last-name-input').value;
+            email = panel.querySelector('.email-input').value;
+            feedbackText = panel.querySelector('.feedback-text').value;
             
-            if (!feedbackText || currentRating === null) {
-              alert('Please provide both feedback and a rating');
+            // Validate inputs
+            if (!firstName || !lastName || !email || !feedbackText || currentRating === null) {
+              alert('Please fill in all required fields and provide a rating');
+              return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+              alert('Please enter a valid email address');
               return;
             }
             
@@ -216,23 +268,45 @@
             panel.querySelector('.submit-btn').innerHTML = 'Submitting...';
             panel.querySelector('.submit-btn').disabled = true;
             
-            setTimeout(() => {
-              // Here we would normally send data to server
-              const feedbackData = {
-                apiKey: config.apiKey,
-                rating: currentRating,
-                feedback: feedbackText,
-                url: window.location.href,
-                userAgent: navigator.userAgent,
-                timestamp: new Date().toISOString()
-              };
+            // Create feedback data object
+            const feedbackData = {
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              rating: currentRating,
+              feedback: feedbackText,
+              product_name: config.productName,
+              url: window.location.href,
+              user_agent: navigator.userAgent
+            };
+            
+            // Submit feedback to Supabase
+            fetch('https://jguptbivgcofgbxnbfjy.supabase.co/rest/v1/feedback', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpndXB0Yml2Z2NvZmdieG5iZmp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI2OTE0MDksImV4cCI6MjA1ODI2NzQwOX0.llRWPou_9dKSUWK3I3TSJ0WOwyvituYDCuFPLE2xZ7U',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(feedbackData)
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to submit feedback');
+              }
               
-              console.log('Feedback submitted:', feedbackData);
+              console.log('Feedback submitted successfully');
               
               // Show success state
               submitted = true;
               renderPanel();
-            }, 1000);
+            })
+            .catch(error => {
+              console.error('Error submitting feedback:', error);
+              alert('There was an error submitting your feedback. Please try again.');
+              panel.querySelector('.submit-btn').innerHTML = 'Submit Feedback';
+              panel.querySelector('.submit-btn').disabled = false;
+            });
           });
         }
       };

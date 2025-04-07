@@ -47,6 +47,22 @@
   transform: scale(1.15);
 }
 
+#feedback-widget-container input, 
+#feedback-widget-container textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s;
+  font-size: 14px;
+}
+
+#feedback-widget-container input:focus, 
+#feedback-widget-container textarea:focus {
+  outline: 2px solid #3b82f6;
+  border-color: transparent;
+}
+
 #feedback-widget-container .feedback-text:focus {
   outline: 2px solid #3b82f6;
   border-color: transparent;
@@ -67,6 +83,13 @@
 
 #feedback-widget-container .dark-mode {
   background: #1f2937;
+  color: white;
+}
+
+#feedback-widget-container .dark-mode input,
+#feedback-widget-container .dark-mode textarea {
+  background: #374151;
+  border-color: #4b5563;
   color: white;
 }
 

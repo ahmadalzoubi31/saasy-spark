@@ -1,8 +1,11 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FeedbackWidgetProps {
   apiKey?: string;
@@ -18,6 +21,9 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
   productName = "this product",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -30,21 +36,50 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
     "top-left": "absolute top-4 left-4",
   };
 
-  const handleSubmit = () => {
-    if (!feedback || rating === null) {
-      toast.error("Please provide both feedback and a rating");
+  const handleSubmit = async () => {
+    // Validate inputs
+    if (!firstName || !lastName || !email || !feedback || rating === null) {
+      toast.error("Please fill in all required fields and provide a rating");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    // Feedback data object
+    const feedbackData = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      rating: rating,
+      feedback: feedback,
+      product_name: productName,
+      url: window.location.href,
+      user_agent: navigator.userAgent
+    };
+    
+    try {
+      // Submit to Supabase
+      const { error } = await supabase
+        .from('feedback')
+        .insert(feedbackData);
+        
+      if (error) throw error;
+      
       setLoading(false);
       setSubmitted(true);
       
       // Reset after delay
       setTimeout(() => {
+        setFirstName("");
+        setLastName("");
+        setEmail("");
         setFeedback("");
         setRating(null);
         setIsOpen(false);
@@ -52,7 +87,11 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
           setSubmitted(false);
         }, 300);
       }, 2000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast.error("Failed to submit feedback. Please try again.");
+      setLoading(false);
+    }
   };
 
   const renderStars = () => {
@@ -172,15 +211,74 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
           ) : (
             <>
               {renderStars()}
-              <Textarea
-                placeholder="Share your thoughts about our product..."
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                className={cn(
-                  "min-h-[100px] mb-4 resize-none transition-all",
-                  darkMode ? "bg-gray-700 border-gray-600" : ""
-                )}
-              />
+              
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    First Name*
+                  </label>
+                  <Input
+                    placeholder="Your first name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className={cn(
+                      "transition-all",
+                      darkMode ? "bg-gray-700 border-gray-600" : ""
+                    )}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Last Name*
+                  </label>
+                  <Input
+                    placeholder="Your last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className={cn(
+                      "transition-all",
+                      darkMode ? "bg-gray-700 border-gray-600" : ""
+                    )}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Email*
+                  </label>
+                  <Input
+                    type="email"
+                    placeholder="Your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={cn(
+                      "transition-all",
+                      darkMode ? "bg-gray-700 border-gray-600" : ""
+                    )}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium block mb-1">
+                    Feedback*
+                  </label>
+                  <Textarea
+                    placeholder="Share your thoughts about our product..."
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    className={cn(
+                      "min-h-[100px] resize-none transition-all",
+                      darkMode ? "bg-gray-700 border-gray-600" : ""
+                    )}
+                    required
+                  />
+                </div>
+              </div>
+              
               <Button
                 onClick={handleSubmit}
                 className="w-full"
