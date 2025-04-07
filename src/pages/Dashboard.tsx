@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -92,12 +91,11 @@ const Dashboard = () => {
   
   const [refreshKey, setRefreshKey] = useState(0);
   
-  // Add new state for feedback data management
   const [managedFeedbackData, setManagedFeedbackData] = useState(feedbackData);
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<typeof feedbackData[0] | null>(null);
   const [replyText, setReplyText] = useState("");
-  
+
   const StatusBadge = ({ status }: { status: string }) => {
     const getStatusColor = () => {
       switch (status) {
@@ -166,25 +164,20 @@ const Dashboard = () => {
     toast.success("Widget refreshed");
   };
   
-  // New function to handle opening the reply dialog
   const handleReplyClick = (feedback: typeof feedbackData[0]) => {
     setCurrentFeedback(feedback);
     setReplyText("");
     setReplyDialogOpen(true);
   };
   
-  // New function to handle sending the reply
   const handleSendReply = () => {
     if (!currentFeedback || !replyText.trim()) {
       toast.error("Please enter a reply message");
       return;
     }
     
-    // In a real app, we would send this to an API
-    // For now, we'll just show a success message
     toast.success(`Reply sent to ${currentFeedback.name}`);
     
-    // Update the feedback status to "In Progress" if it was "New"
     if (currentFeedback.status === "New") {
       setManagedFeedbackData(prevData => 
         prevData.map(item => 
@@ -199,7 +192,6 @@ const Dashboard = () => {
     setReplyText("");
   };
   
-  // New function to handle marking feedback as resolved
   const handleMarkAsResolved = (feedbackId: number) => {
     setManagedFeedbackData(prevData => 
       prevData.map(item => 
@@ -210,6 +202,16 @@ const Dashboard = () => {
     );
     
     toast.success("Feedback marked as resolved");
+  };
+
+  const getWidgetInstallationCode = () => {
+    return `<script 
+  src="https://saasy-spark.lovable.app/widget.js" 
+  data-api-key="YOUR_API_KEY"
+  data-position="${widgetSettings.position}"
+  data-dark-mode="${widgetSettings.darkMode}"
+  data-product-name="${widgetSettings.productName}">
+</script>`;
   };
 
   return (
@@ -716,16 +718,14 @@ const Dashboard = () => {
                         
                         <div className="relative">
                           <pre className="p-4 bg-muted rounded-md text-xs overflow-x-auto">
-                            {`<script src="https://feedback-saas.com/widget.js?api_key=YOUR_API_KEY"></script>`}
+                            {getWidgetInstallationCode()}
                           </pre>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="absolute top-2 right-2"
                             onClick={() => {
-                              navigator.clipboard.writeText(
-                                `<script src="https://feedback-saas.com/widget.js?api_key=YOUR_API_KEY"></script>`
-                              );
+                              navigator.clipboard.writeText(getWidgetInstallationCode());
                               toast.success("Code copied to clipboard");
                             }}
                           >
@@ -758,7 +758,6 @@ const Dashboard = () => {
                         </Button>
                       </div>
                       <div className="p-8 flex items-center justify-center h-[400px] relative">
-                        {/* The key change is here - we're adding position:relative to this div */}
                         <div className="w-full h-full relative">
                           <FeedbackWidget 
                             key={refreshKey}
