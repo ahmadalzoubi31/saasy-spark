@@ -93,7 +93,6 @@ const Dashboard = () => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<FeedbackStatus>("New");
 
-  // Fetch feedback data
   useEffect(() => {
     const fetchFeedback = async () => {
       setLoading(true);
@@ -128,9 +127,7 @@ const Dashboard = () => {
         
         console.log("Replies data:", replies);
         
-        // For testing: If no data is returned, create sample data
         if (!feedback || feedback.length === 0) {
-          // Create sample feedback entry
           const sampleFeedback = {
             id: "sample-id-1",
             first_name: "John",
@@ -195,7 +192,6 @@ const Dashboard = () => {
     try {
       console.log("Sending reply to feedback:", currentFeedback.id);
       
-      // Save reply to database
       const { data, error } = await supabase
         .from('feedback_replies')
         .insert({
@@ -212,11 +208,9 @@ const Dashboard = () => {
       
       console.log("Reply saved successfully:", data);
       
-      // Update local state with new reply
       if (data && data.length > 0) {
         setFeedbackReplies(prev => [...prev, data[0] as FeedbackReply]);
         
-        // Also update the status to "In Progress" if it's currently "New"
         if (currentFeedback.status === "New") {
           const updatedFeedback = await updateFeedbackStatus(currentFeedback.id, "In Progress");
           if (updatedFeedback) {
@@ -256,7 +250,6 @@ const Dashboard = () => {
   };
 
   const handleExportFeedback = () => {
-    // Filter feedback if filters are applied
     let dataToExport = feedbackData;
     
     if (filterStatus !== "All") {
@@ -276,7 +269,6 @@ const Dashboard = () => {
     setTimeout(() => {
       let query = supabase.from('feedback').select('*');
       
-      // Apply filters if they're not set to "All"
       if (filterStatus !== "All") {
         query = query.eq('status', filterStatus);
       }
@@ -303,7 +295,6 @@ const Dashboard = () => {
     setFilterStatus("All");
     setFilterRating("All");
     
-    // Re-fetch all feedback
     setLoading(true);
     supabase
       .from('feedback')
@@ -335,7 +326,6 @@ const Dashboard = () => {
 </script>`;
   };
 
-  // Format date to a more readable format
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -347,7 +337,6 @@ const Dashboard = () => {
     });
   };
 
-  // Status Badge component with updated status support
   const StatusBadge = ({ status }: { status: string }) => {
     const getStatusColor = () => {
       switch (status) {
@@ -396,15 +385,12 @@ const Dashboard = () => {
     );
   };
 
-  // Filter function for feedback data
   const getFilteredFeedback = () => {
     return feedbackData.filter(feedback => {
-      // Apply status filter if not set to "All"
       if (filterStatus !== "All" && feedback.status !== filterStatus) {
         return false;
       }
       
-      // Apply rating filter if not set to "All"
       if (filterRating !== "All" && feedback.rating !== filterRating) {
         return false;
       }
@@ -413,7 +399,6 @@ const Dashboard = () => {
     });
   };
 
-  // Get profile name for replies
   const getReplyAuthorName = (reply: FeedbackReply) => {
     if (!reply.profiles) return "Admin";
     
@@ -529,7 +514,6 @@ const Dashboard = () => {
               </TabsList>
             </div>
             
-            {/* Debug information for fetching status */}
             {fetchError && (
               <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-md text-red-700">
                 <p className="font-bold">Error fetching data:</p>
@@ -736,3 +720,28 @@ const Dashboard = () => {
                         <YAxis
                           stroke="#888888"
                           fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(value) => `${value}`}
+                        />
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <Tooltip />
+                        <Bar
+                          dataKey="count"
+                          fill="#3B82F6"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
+    </PageTransition>
+  );
+};
+
+export default Dashboard;
