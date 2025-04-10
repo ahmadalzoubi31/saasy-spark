@@ -19,6 +19,13 @@ export interface FeedbackReply {
   message: string;
   user_id?: string;
   created_at: string;
+  profiles?: {
+    id: string;
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    avatar_url?: string;
+  };
 }
 
 export type FeedbackStatus = "New" | "In Progress" | "Reviewed" | "Resolved";

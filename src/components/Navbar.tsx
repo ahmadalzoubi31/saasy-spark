@@ -1,12 +1,13 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     try {
@@ -14,6 +15,18 @@ const Navbar = () => {
       navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
+    }
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    if (location.pathname !== "/") {
+      navigate("/?section=" + sectionId);
+      return;
+    }
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -36,6 +49,18 @@ const Navbar = () => {
           >
             Home
           </Link>
+          <button
+            onClick={() => scrollToSection("features")}
+            className="text-sm font-medium transition-colors hover:text-foreground/80"
+          >
+            Features
+          </button>
+          <button
+            onClick={() => scrollToSection("pricing")}
+            className="text-sm font-medium transition-colors hover:text-foreground/80"
+          >
+            Pricing
+          </button>
           <Link
             to="/dashboard"
             className="text-sm font-medium transition-colors hover:text-foreground/80"
