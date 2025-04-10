@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -76,7 +75,8 @@ const Dashboard = () => {
         
         const { data: replies, error: repliesError } = await supabase
           .from('feedback_replies')
-          .select('*');
+          .select('*')
+          .order('created_at', { ascending: true });
           
         if (repliesError) throw repliesError;
         
