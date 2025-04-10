@@ -19,6 +19,7 @@ export type Database = {
           last_name: string
           product_name: string | null
           rating: number
+          status: string
           url: string | null
           user_agent: string | null
         }
@@ -31,6 +32,7 @@ export type Database = {
           last_name: string
           product_name?: string | null
           rating: number
+          status?: string
           url?: string | null
           user_agent?: string | null
         }
@@ -43,6 +45,7 @@ export type Database = {
           last_name?: string
           product_name?: string | null
           rating?: number
+          status?: string
           url?: string | null
           user_agent?: string | null
         }
@@ -54,18 +57,21 @@ export type Database = {
           feedback_id: string
           id: string
           message: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           feedback_id: string
           id?: string
           message: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           feedback_id?: string
           id?: string
           message?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -76,6 +82,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {
