@@ -194,7 +194,7 @@ const Dashboard = () => {
       
       // Update local state with new reply
       if (data && data.length > 0) {
-        setFeedbackReplies(prev => [...prev, data[0]]);
+        setFeedbackReplies(prev => [...prev, data[0] as FeedbackReply]);
       }
       
       toast.success(`Reply sent to ${currentFeedback.first_name}`);
@@ -223,7 +223,7 @@ const Dashboard = () => {
       
       // Update local state with new reply
       if (data && data.length > 0) {
-        setFeedbackReplies(prev => [...prev, data[0]]);
+        setFeedbackReplies(prev => [...prev, data[0] as FeedbackReply]);
       }
       
       toast.success("Feedback marked as resolved");
