@@ -60,27 +60,62 @@ const Dashboard = () => {
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState<Feedback | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Fetch feedback data
   useEffect(() => {
     const fetchFeedback = async () => {
       setLoading(true);
+      setFetchError(null);
+      
       try {
+        console.log("Fetching feedback data...");
+        
         const { data: feedback, error } = await supabase
           .from('feedback')
           .select('*')
           .order('created_at', { ascending: false });
           
-        if (error) throw error;
+        if (error) {
+          console.error('Feedback fetch error:', error);
+          setFetchError(`Failed to fetch feedback: ${error.message}`);
+          throw error;
+        }
+        
+        console.log("Feedback data:", feedback);
         
         const { data: replies, error: repliesError } = await supabase
           .from('feedback_replies')
           .select('*')
           .order('created_at', { ascending: true });
           
-        if (repliesError) throw repliesError;
+        if (repliesError) {
+          console.error('Replies fetch error:', repliesError);
+          setFetchError(`Failed to fetch replies: ${repliesError.message}`);
+          throw repliesError;
+        }
         
-        setFeedbackData(feedback || []);
+        console.log("Replies data:", replies);
+        
+        // For testing: If no data is returned, create sample data
+        if (!feedback || feedback.length === 0) {
+          // Create sample feedback entry
+          const sampleFeedback = {
+            id: "sample-id-1",
+            first_name: "John",
+            last_name: "Doe",
+            email: "john@example.com",
+            rating: 4,
+            feedback: "This is a sample feedback entry for testing purposes.",
+            created_at: new Date().toISOString()
+          };
+          
+          console.log("No feedback found, using sample data:", [sampleFeedback]);
+          setFeedbackData([sampleFeedback as Feedback]);
+        } else {
+          setFeedbackData(feedback || []);
+        }
+        
         setFeedbackReplies(replies || []);
       } catch (error) {
         console.error('Error fetching feedback:', error);
@@ -181,6 +216,8 @@ const Dashboard = () => {
     }
     
     try {
+      console.log("Sending reply to feedback:", currentFeedback.id);
+      
       // Save reply to database
       const { data, error } = await supabase
         .from('feedback_replies')
@@ -190,7 +227,12 @@ const Dashboard = () => {
         })
         .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error sending reply:', error);
+        throw error;
+      }
+      
+      console.log("Reply saved successfully:", data);
       
       // Update local state with new reply
       if (data && data.length > 0) {
@@ -362,6 +404,14 @@ const Dashboard = () => {
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
             </div>
+            
+            {/* Debug information for fetching status */}
+            {fetchError && (
+              <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded-md text-red-700">
+                <p className="font-bold">Error fetching data:</p>
+                <p>{fetchError}</p>
+              </div>
+            )}
             
             <TabsContent value="overview" className="space-y-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -725,7 +775,28 @@ const Dashboard = () => {
                     </div>
                   ) : feedbackData.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      No feedback received yet.
+                      <p>No feedback received yet.</p>
+                      <p className="mt-2">Debugging info: {JSON.stringify({dataLength: feedbackData.length})}</p>
+                      <Button 
+                        className="mt-4"
+                        onClick={() => {
+                          // Create sample feedback entry
+                          const sampleFeedback = {
+                            id: "sample-id-" + Math.random().toString(36).substring(2, 9),
+                            first_name: "Test",
+                            last_name: "User",
+                            email: "test@example.com",
+                            rating: 4,
+                            feedback: "This is a sample feedback for testing the UI.",
+                            created_at: new Date().toISOString()
+                          };
+                          
+                          setFeedbackData([sampleFeedback as Feedback]);
+                          toast.success("Added sample feedback for testing");
+                        }}
+                      >
+                        Add Sample Feedback (For Testing)
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-6">
