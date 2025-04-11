@@ -1,10 +1,11 @@
+
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/layout/PageTransition";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, Star, Rocket, Package, Lightning, FileCode, Zap, Clock, ShieldCheck } from "lucide-react";
 
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -128,12 +129,54 @@ const Index = () => {
     </div>
   );
 
+  const Testimonial = ({ 
+    quote, 
+    author, 
+    role,
+    avatar,
+    delay = 0 
+  }: { 
+    quote: string; 
+    author: string; 
+    role: string;
+    avatar?: string;
+    delay?: number;
+  }) => (
+    <div 
+      className="animate-on-scroll opacity-0 flex flex-col p-6 glass-panel-sm"
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div className="flex items-center mb-1">
+        {[1, 2, 3, 4, 5].map(star => (
+          <Star key={star} size={16} className="text-yellow-400 fill-yellow-400" />
+        ))}
+      </div>
+      <p className="my-4 text-lg">{quote}</p>
+      <div className="flex items-center mt-auto">
+        <div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden mr-3">
+          {avatar ? (
+            <img src={avatar} alt={author} className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary font-medium">
+              {author.charAt(0)}
+            </div>
+          )}
+        </div>
+        <div>
+          <p className="font-medium">{author}</p>
+          <p className="text-sm text-muted-foreground">{role}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <PageTransition>
-      <div className="overflow-hidden pt-16">
+      <div className="overflow-hidden">
         <section
           ref={heroRef}
-          className="relative pt-20 pb-32 overflow-hidden"
+          className="relative py-20 md:py-32 overflow-hidden"
+          id="hero"
         >
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
           
@@ -144,17 +187,17 @@ const Index = () => {
             <div className="max-w-3xl mx-auto text-center mb-16">
               <div className="inline-block animate-fade-in">
                 <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 text-primary mb-5">
-                  Introducing Feedback SaaS
+                  Ship Your SaaS Fast
                 </span>
               </div>
               
               <h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-up">
-                Collect and analyze feedback{" "}
-                <span className="text-gradient">beautifully</span>
+                Launch your SaaS in{" "}
+                <span className="text-gradient">hours, not months</span>
               </h1>
               
               <p className="text-xl text-muted-foreground mb-8 animate-fade-up" style={{ animationDelay: "100ms" }}>
-                The most elegant way to collect, organize, and act on customer feedback. Elevate your product with insights that matter.
+                The ultimate React SaaS boilerplate to help founders focus on their product and launch faster.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "200ms" }}>
@@ -169,9 +212,17 @@ const Index = () => {
                   </Button>
                 </button>
               </div>
+              
+              <div className="mt-8 flex items-center justify-center text-sm text-muted-foreground">
+                <Check className="mr-2 h-4 w-4" /> No credit card required
+                <span className="mx-3">•</span>
+                <Check className="mr-2 h-4 w-4" /> 14-day free trial
+                <span className="mx-3">•</span>
+                <Check className="mr-2 h-4 w-4" /> Cancel anytime
+              </div>
             </div>
             
-            <div className="relative max-w-4xl mx-auto animate-fade-up" style={{ animationDelay: "300ms" }}>
+            <div className="relative max-w-5xl mx-auto animate-fade-up" style={{ animationDelay: "300ms" }}>
               <div className="glass-panel p-4 md:p-6 shadow-2xl">
                 <div className="aspect-[16/9] overflow-hidden rounded-lg border border-border/40 bg-white">
                   <div className="flex h-10 items-center border-b bg-muted/50 px-4">
@@ -209,6 +260,25 @@ const Index = () => {
         </section>
         
         <section
+          className="py-20 md:py-28"
+        >
+          <div className="container">
+            <div className="text-center mb-10">
+              <p className="text-sm font-medium text-primary mb-1">TRUSTED BY HUNDREDS OF STARTUPS</p>
+              <h2 className="text-3xl font-bold">Built for serious founders</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-10">
+              {["Company 1", "Company 2", "Company 3", "Company 4", "Company 5", "Company 6"].map((company, i) => (
+                <div key={i} className="flex items-center justify-center h-12">
+                  <div className="text-xl font-semibold text-muted-foreground">{company}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        
+        <section
           ref={featuresRef}
           className="py-24 bg-secondary/50"
           id="features"
@@ -216,150 +286,126 @@ const Index = () => {
           <div className="container">
             <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
               <h2 className="text-3xl font-bold mb-4">
-                Everything you need for perfect feedback
+                Everything you need to ship faster
               </h2>
               <p className="text-muted-foreground text-lg">
-                All the tools to collect, analyze, and act on customer insights, 
-                beautifully designed for a seamless experience.
+                Stop wasting time reinventing the wheel. ShipFast comes packed with all the features 
+                you need to focus on what really matters.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
-                    />
-                  </svg>
-                }
-                title="Elegant Feedback Widget"
-                description="A beautiful, customizable widget that seamlessly integrates with your product to collect feedback."
+                icon={<Rocket className="h-6 w-6" />}
+                title="Launch Faster"
+                description="Go from idea to production in hours, not months. All the boilerplate is taken care of."
                 delay={0}
               />
               
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-                    />
-                  </svg>
-                }
-                title="Insightful Analytics"
-                description="Transform feedback into actionable insights with our powerful analytics dashboard."
+                icon={<Package className="h-6 w-6" />}
+                title="Authentication Ready"
+                description="Complete authentication system with email/password, magic links, and social logins."
                 delay={150}
               />
               
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.379.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.379-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                }
-                title="Customizable Integration"
-                description="Tailor the widget to match your brand's identity with our flexible customization options."
+                icon={<Lightning className="h-6 w-6" />}
+                title="Payments Included"
+                description="Stripe subscription payments ready to go, including checkout and customer portal."
                 delay={300}
               />
               
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3"
-                    />
-                  </svg>
-                }
-                title="Team Collaboration"
-                description="Work together to respond to feedback with our collaborative tools for teams of all sizes."
+                icon={<FileCode className="h-6 w-6" />}
+                title="Modern Tech Stack"
+                description="Built with React, TypeScript, Tailwind CSS, and other modern tools developers love."
                 delay={450}
               />
               
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-                    />
-                  </svg>
-                }
-                title="Automated Workflows"
-                description="Set up triggers and actions based on feedback to automate your response processes."
+                icon={<Zap className="h-6 w-6" />}
+                title="SEO Optimized"
+                description="SEO best practices built in, so your product ranks well on search engines."
                 delay={600}
               />
               
               <Feature
-                icon={
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 0121 12z"
-                    />
-                  </svg>
-                }
-                title="Sentiment Analysis"
-                description="Leverage AI to understand the sentiment behind your feedback and identify trends."
+                icon={<Clock className="h-6 w-6" />}
+                title="Regular Updates"
+                description="Actively maintained and updated with new features and security patches."
                 delay={750}
+              />
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-24">
+          <div className="container">
+            <div className="max-w-3xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+              <h2 className="text-3xl font-bold mb-4">How it works</h2>
+              <p className="text-muted-foreground text-lg">
+                Launch your SaaS business in three simple steps
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
+              {[
+                {
+                  number: "01",
+                  title: "Clone the repo",
+                  description: "Get started with a single command. Clone the repo and you're halfway there."
+                },
+                {
+                  number: "02",
+                  title: "Customize it",
+                  description: "Add your brand colors, logo, and content. The codebase is clean and easy to customize."
+                },
+                {
+                  number: "03",
+                  title: "Launch it",
+                  description: "Deploy with a single click to Vercel or your preferred hosting provider."
+                }
+              ].map((step, i) => (
+                <div key={i} className="animate-on-scroll opacity-0 flex flex-col items-center text-center" style={{ transitionDelay: `${i * 150}ms` }}>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xl font-bold mb-4">
+                    {step.number}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-muted-foreground">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        
+        <section className="py-24 bg-secondary/30">
+          <div className="container">
+            <div className="max-w-3xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+              <h2 className="text-3xl font-bold mb-4">What founders say</h2>
+              <p className="text-muted-foreground text-lg">
+                Don't just take our word for it
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Testimonial 
+                quote="ShipFast saved me at least 2 months of development time. The authentication and payment systems worked flawlessly out of the box."
+                author="Sarah Johnson"
+                role="Founder, AnalyticsPro"
+                delay={0}
+              />
+              <Testimonial 
+                quote="As a solo founder, I couldn't afford to spend months building infrastructure. With ShipFast, I launched my MVP in just 2 weeks."
+                author="Michael Chen"
+                role="Founder, TaskMaster"
+                delay={150}
+              />
+              <Testimonial 
+                quote="The codebase is so clean and well-structured. It was incredibly easy to customize to our needs and add our own features."
+                author="Jessica Smith"
+                role="CTO, DesignFlow"
+                delay={300}
               />
             </div>
           </div>
@@ -386,31 +432,33 @@ const Index = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <PricingTier
-                name="Free"
-                price="Free"
-                description="For individuals and small projects just getting started."
+                name="Starter"
+                price="$49"
+                description="One-time payment, perfect for indie hackers getting started."
                 features={[
-                  "1 Project",
-                  "100 feedback entries/month",
-                  "Basic analytics",
-                  "Email support",
-                  "Widget customization"
+                  "Full source code",
+                  "Authentication system",
+                  "Responsive design",
+                  "Landing page",
+                  "6 months of updates",
+                  "Community support"
                 ]}
                 delay={0}
               />
               
               <PricingTier
                 name="Pro"
-                price="$29"
-                description="For growing businesses with more advanced needs."
+                price="$149"
+                description="Best for funded startups ready to move fast."
                 features={[
-                  "5 Projects",
-                  "Unlimited feedback entries",
-                  "Advanced analytics",
-                  "Priority email support",
-                  "Custom branding",
-                  "Team collaboration (3 members)",
-                  "Feedback export"
+                  "Everything in Starter",
+                  "Stripe subscription payments",
+                  "User dashboard",
+                  "Admin panel",
+                  "Email templates",
+                  "API documentation",
+                  "1 year of updates",
+                  "Priority support"
                 ]}
                 highlighted={true}
                 delay={150}
@@ -418,17 +466,17 @@ const Index = () => {
               
               <PricingTier
                 name="Enterprise"
-                price="$99"
-                description="For large organizations requiring scalable solutions."
+                price="$499"
+                description="For teams needing customization and dedicated support."
                 features={[
-                  "Unlimited Projects",
-                  "Unlimited feedback entries",
-                  "Enterprise analytics",
-                  "24/7 phone & email support",
+                  "Everything in Pro",
+                  "White label rights",
+                  "Custom branding",
+                  "Multiple team support",
                   "Custom integrations",
-                  "Unlimited team members",
-                  "Dedicated account manager",
-                  "SLA guarantee"
+                  "Lifetime updates",
+                  "Dedicated support",
+                  "1-hour onboarding call"
                 ]}
                 delay={300}
               />
@@ -447,30 +495,151 @@ const Index = () => {
           </div>
         </section>
         
+        <section className="py-24 bg-secondary/30">
+          <div className="container">
+            <div className="max-w-3xl mx-auto mb-16 animate-on-scroll opacity-0">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold mb-4">Frequently asked questions</h2>
+                <p className="text-muted-foreground text-lg">
+                  Got questions? We've got answers.
+                </p>
+              </div>
+              
+              <div className="space-y-6">
+                {[
+                  {
+                    question: "Is this a one-time payment?",
+                    answer: "Yes, all our packages are one-time payments. You get access to the complete source code and specified period of updates."
+                  },
+                  {
+                    question: "What tech stack is used?",
+                    answer: "ShipFast is built with React, TypeScript, Tailwind CSS, and Supabase for backend functionalities."
+                  },
+                  {
+                    question: "Do I need to know how to code?",
+                    answer: "Basic knowledge of React and JavaScript will help you customize the codebase to your needs. But we provide documentation to help you get started."
+                  },
+                  {
+                    question: "Can I use this for client projects?",
+                    answer: "Absolutely! The Starter and Pro licenses allow you to use ShipFast for a single end product. For multiple client projects, check out our Enterprise license."
+                  },
+                  {
+                    question: "Do you offer refunds?",
+                    answer: "Due to the digital nature of the product, we do not offer refunds. But we do offer a free demo so you can try before you buy."
+                  }
+                ].map((faq, i) => (
+                  <div key={i} className="border-b border-border pb-6">
+                    <h3 className="text-xl font-semibold mb-2">{faq.question}</h3>
+                    <p className="text-muted-foreground">{faq.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        
         <section className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
           <div className="absolute top-1/2 -left-64 w-[500px] h-[500px] bg-primary/20 rounded-full blur-3xl -z-10"></div>
           
           <div className="container">
             <div className="glass-panel max-w-4xl mx-auto p-12 text-center animate-on-scroll opacity-0">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+                <Rocket className="h-8 w-8" />
+              </div>
+              
               <h2 className="text-3xl font-bold mb-4">
-                Ready to elevate your customer feedback experience?
+                Ready to ship your SaaS faster?
               </h2>
               <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-                Join thousands of companies using our platform to collect actionable 
-                insights and build better products.
+                Join hundreds of founders who have accelerated their journey from idea to paying customers using ShipFast.
               </p>
               <Link to="/auth?signup=true">
                 <Button size="lg" className="h-12 px-10 btn-primary">
-                  Start your free trial
+                  Start your 14-day free trial
                 </Button>
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
-                No credit card required. 14-day free trial.
+                No credit card required. Cancel anytime.
               </p>
             </div>
           </div>
         </section>
+        
+        <footer className="py-12 bg-gray-50 dark:bg-gray-900">
+          <div className="container">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div>
+                <Link to="/" className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white">
+                    S
+                  </div>
+                  <span className="font-semibold">ShipFast</span>
+                </Link>
+                <p className="text-sm text-muted-foreground mb-4">
+                  The ultimate SaaS starter kit for busy founders.
+                </p>
+                <div className="flex space-x-4">
+                  {["Twitter", "GitHub", "LinkedIn"].map((social, i) => (
+                    <a key={i} href="#" className="text-muted-foreground hover:text-foreground">
+                      {social}
+                    </a>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-4">Product</h3>
+                <ul className="space-y-3">
+                  {["Features", "Pricing", "Testimonials", "FAQ"].map((item, i) => (
+                    <li key={i}>
+                      <a href="#" className="text-muted-foreground hover:text-foreground">
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-4">Resources</h3>
+                <ul className="space-y-3">
+                  {["Documentation", "Blog", "Changelog", "Support"].map((item, i) => (
+                    <li key={i}>
+                      <a href="#" className="text-muted-foreground hover:text-foreground">
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold mb-4">Company</h3>
+                <ul className="space-y-3">
+                  {["About", "Contact", "Terms", "Privacy"].map((item, i) => (
+                    <li key={i}>
+                      <a href="#" className="text-muted-foreground hover:text-foreground">
+                        {item}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            <div className="border-t border-border mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                © 2023 ShipFast. All rights reserved.
+              </p>
+              <div className="flex space-x-4 mt-4 md:mt-0">
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Cookies</a>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </PageTransition>
   );

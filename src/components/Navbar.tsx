@@ -36,9 +36,9 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white">
-              F
+              S
             </div>
-            <span className="font-semibold">Feedback</span>
+            <span className="font-semibold">ShipFast</span>
           </Link>
         </div>
         
