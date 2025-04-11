@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import PageTransition from "@/components/layout/PageTransition";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { cn } from "@/lib/utils";
 import { Check, Star, Rocket, Package, Lightning, FileCode, Zap, Clock, ShieldCheck } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -566,80 +566,7 @@ const Index = () => {
           </div>
         </section>
         
-        <footer className="py-12 bg-gray-50 dark:bg-gray-900">
-          <div className="container">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div>
-                <Link to="/" className="flex items-center gap-2 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-white">
-                    S
-                  </div>
-                  <span className="font-semibold">ShipFast</span>
-                </Link>
-                <p className="text-sm text-muted-foreground mb-4">
-                  The ultimate SaaS starter kit for busy founders.
-                </p>
-                <div className="flex space-x-4">
-                  {["Twitter", "GitHub", "LinkedIn"].map((social, i) => (
-                    <a key={i} href="#" className="text-muted-foreground hover:text-foreground">
-                      {social}
-                    </a>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-4">Product</h3>
-                <ul className="space-y-3">
-                  {["Features", "Pricing", "Testimonials", "FAQ"].map((item, i) => (
-                    <li key={i}>
-                      <a href="#" className="text-muted-foreground hover:text-foreground">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-4">Resources</h3>
-                <ul className="space-y-3">
-                  {["Documentation", "Blog", "Changelog", "Support"].map((item, i) => (
-                    <li key={i}>
-                      <a href="#" className="text-muted-foreground hover:text-foreground">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-4">Company</h3>
-                <ul className="space-y-3">
-                  {["About", "Contact", "Terms", "Privacy"].map((item, i) => (
-                    <li key={i}>
-                      <a href="#" className="text-muted-foreground hover:text-foreground">
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            
-            <div className="border-t border-border mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                © 2023 ShipFast. All rights reserved.
-              </p>
-              <div className="flex space-x-4 mt-4 md:mt-0">
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Terms</a>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Privacy</a>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground">Cookies</a>
-              </div>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </PageTransition>
   );
