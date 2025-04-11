@@ -81,6 +81,13 @@ export type Database = {
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_replies_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {

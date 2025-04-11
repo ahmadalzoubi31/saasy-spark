@@ -58,6 +58,8 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Copy, BarChart3, MessageSquare, Settings, Sliders, Filter, RefreshCw, Download, CheckCircle2, CircleAlert } from "lucide-react";
 
 const data = [
   { name: "Jan", value: 25 },
@@ -423,46 +425,54 @@ const Dashboard = () => {
             </div>
             
             <nav className="hidden md:flex items-center gap-6">
-              <Link
-                to="/dashboard"
+              <button
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-foreground/80",
                   activeTab === "overview" ? "text-foreground" : "text-foreground/60"
                 )}
                 onClick={() => setActiveTab("overview")}
               >
-                Overview
-              </Link>
-              <Link
-                to="/dashboard"
+                <div className="flex items-center gap-1">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Overview</span>
+                </div>
+              </button>
+              <button
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-foreground/80",
                   activeTab === "feedback" ? "text-foreground" : "text-foreground/60"
                 )}
                 onClick={() => setActiveTab("feedback")}
               >
-                Feedback
-              </Link>
-              <Link
-                to="/dashboard"
+                <div className="flex items-center gap-1">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Feedback</span>
+                </div>
+              </button>
+              <button
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-foreground/80",
                   activeTab === "widget" ? "text-foreground" : "text-foreground/60"
                 )}
                 onClick={() => setActiveTab("widget")}
               >
-                Widget
-              </Link>
-              <Link
-                to="/dashboard"
+                <div className="flex items-center gap-1">
+                  <Sliders className="w-4 h-4" />
+                  <span>Widget</span>
+                </div>
+              </button>
+              <button
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-foreground/80",
                   activeTab === "settings" ? "text-foreground" : "text-foreground/60"
                 )}
                 onClick={() => setActiveTab("settings")}
               >
-                Settings
-              </Link>
+                <div className="flex items-center gap-1">
+                  <Settings className="w-4 h-4" />
+                  <span>Settings</span>
+                </div>
+              </button>
             </nav>
             
             <div className="flex items-center gap-2">
@@ -740,6 +750,91 @@ const Dashboard = () => {
           </Tabs>
         </main>
       </div>
+
+      <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reply to {currentFeedback?.first_name}</DialogTitle>
+            <DialogDescription>
+              Send a response to this customer feedback.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-muted p-3 rounded-md text-sm">
+              <div className="flex justify-between mb-1">
+                <span className="font-medium">{currentFeedback?.first_name} {currentFeedback?.last_name}</span>
+                <RatingStars rating={currentFeedback?.rating || 0} />
+              </div>
+              <p className="mb-1">{currentFeedback?.feedback}</p>
+              <span className="text-xs text-muted-foreground">
+                {currentFeedback ? formatDate(currentFeedback.created_at) : ''}
+              </span>
+            </div>
+            
+            <Textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="Type your reply here..."
+              className="min-h-[100px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReplyDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSendReply} disabled={!replyText.trim()}>Send Reply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Status</DialogTitle>
+            <DialogDescription>
+              Change the status of this feedback.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <RadioGroup 
+              value={selectedStatus} 
+              onValueChange={(value) => setSelectedStatus(value as FeedbackStatus)}
+              className="space-y-3"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="New" id="status-new" />
+                <Label htmlFor="status-new" className="flex items-center gap-2">
+                  <StatusBadge status="New" />
+                  <span>New - Feedback received but not yet processed</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="In Progress" id="status-progress" />
+                <Label htmlFor="status-progress" className="flex items-center gap-2">
+                  <StatusBadge status="In Progress" />
+                  <span>In Progress - Currently being reviewed</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Reviewed" id="status-reviewed" />
+                <Label htmlFor="status-reviewed" className="flex items-center gap-2">
+                  <StatusBadge status="Reviewed" />
+                  <span>Reviewed - Feedback has been evaluated</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Resolved" id="status-resolved" />
+                <Label htmlFor="status-resolved" className="flex items-center gap-2">
+                  <StatusBadge status="Resolved" />
+                  <span>Resolved - Issue addressed and completed</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdateStatus}>Update Status</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageTransition>
   );
 };

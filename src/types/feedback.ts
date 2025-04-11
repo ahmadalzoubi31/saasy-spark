@@ -25,7 +25,7 @@ export interface FeedbackReply {
     first_name?: string;
     last_name?: string;
     avatar_url?: string;
-  };
+  } | null;
 }
 
 export type FeedbackStatus = "New" | "In Progress" | "Reviewed" | "Resolved";
