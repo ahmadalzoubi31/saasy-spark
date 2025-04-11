@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/layout/PageTransition";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { cn } from "@/lib/utils";
-import { Check, Star, Rocket, Package, Lightning, FileCode, Zap, Clock, ShieldCheck } from "lucide-react";
+import { Check, Star, Rocket, Package, Zap, FileCode, Clock, ShieldCheck } from "lucide-react";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -310,7 +310,7 @@ const Index = () => {
               />
               
               <Feature
-                icon={<Lightning className="h-6 w-6" />}
+                icon={<Zap className="h-6 w-6" />}
                 title="Payments Included"
                 description="Stripe subscription payments ready to go, including checkout and customer portal."
                 delay={300}
@@ -381,127 +381,11 @@ const Index = () => {
         
         <section className="py-24 bg-secondary/30">
           <div className="container">
-            <div className="max-w-3xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
-              <h2 className="text-3xl font-bold mb-4">What founders say</h2>
-              <p className="text-muted-foreground text-lg">
-                Don't just take our word for it
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Testimonial 
-                quote="ShipFast saved me at least 2 months of development time. The authentication and payment systems worked flawlessly out of the box."
-                author="Sarah Johnson"
-                role="Founder, AnalyticsPro"
-                delay={0}
-              />
-              <Testimonial 
-                quote="As a solo founder, I couldn't afford to spend months building infrastructure. With ShipFast, I launched my MVP in just 2 weeks."
-                author="Michael Chen"
-                role="Founder, TaskMaster"
-                delay={150}
-              />
-              <Testimonial 
-                quote="The codebase is so clean and well-structured. It was incredibly easy to customize to our needs and add our own features."
-                author="Jessica Smith"
-                role="CTO, DesignFlow"
-                delay={300}
-              />
-            </div>
-          </div>
-        </section>
-        
-        <section
-          ref={pricingRef}
-          className="py-24 relative overflow-hidden"
-          id="pricing"
-        >
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-background via-background to-primary/5"></div>
-          <div className="absolute top-1/2 -left-64 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -z-10"></div>
-          <div className="absolute bottom-0 -right-64 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -z-10"></div>
-          
-          <div className="container">
-            <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
-              <h2 className="text-3xl font-bold mb-4">
-                Simple, transparent pricing
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Choose the perfect plan for your needs. No hidden fees or surprises.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <PricingTier
-                name="Starter"
-                price="$49"
-                description="One-time payment, perfect for indie hackers getting started."
-                features={[
-                  "Full source code",
-                  "Authentication system",
-                  "Responsive design",
-                  "Landing page",
-                  "6 months of updates",
-                  "Community support"
-                ]}
-                delay={0}
-              />
-              
-              <PricingTier
-                name="Pro"
-                price="$149"
-                description="Best for funded startups ready to move fast."
-                features={[
-                  "Everything in Starter",
-                  "Stripe subscription payments",
-                  "User dashboard",
-                  "Admin panel",
-                  "Email templates",
-                  "API documentation",
-                  "1 year of updates",
-                  "Priority support"
-                ]}
-                highlighted={true}
-                delay={150}
-              />
-              
-              <PricingTier
-                name="Enterprise"
-                price="$499"
-                description="For teams needing customization and dedicated support."
-                features={[
-                  "Everything in Pro",
-                  "White label rights",
-                  "Custom branding",
-                  "Multiple team support",
-                  "Custom integrations",
-                  "Lifetime updates",
-                  "Dedicated support",
-                  "1-hour onboarding call"
-                ]}
-                delay={300}
-              />
-            </div>
-            
-            <div className="mt-16 text-center animate-on-scroll opacity-0">
-              <p className="text-muted-foreground mb-4">
-                Need a custom plan? We've got you covered.
-              </p>
-              <Link to="/contact">
-                <Button variant="outline" size="lg">
-                  Contact sales
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-24 bg-secondary/30">
-          <div className="container">
             <div className="max-w-3xl mx-auto mb-16 animate-on-scroll opacity-0">
               <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold mb-4">Frequently asked questions</h2>
+                <h2 className="text-3xl font-bold mb-4">What founders say</h2>
                 <p className="text-muted-foreground text-lg">
-                  Got questions? We've got answers.
+                  Don't just take our word for it
                 </p>
               </div>
               
