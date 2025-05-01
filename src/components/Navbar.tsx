@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -89,23 +88,6 @@ const Navbar = () => {
           </div>
         </div>
       </header>
-      
-      {location.pathname === "/" && (
-        <footer className="bg-background/80 backdrop-blur-xl border-t py-6">
-          <div className="container flex flex-col items-center justify-center">
-            <div className="flex items-center gap-2 mb-2 group">
-              <span className="text-sm text-muted-foreground">Built by Ahmad in</span>
-              <div className="flex items-center gap-1">
-                <span className="text-sm font-bold group-hover:text-primary transition-colors">3 days</span>
-                <Zap size={16} className="text-yellow-500 group-hover:animate-pulse" />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              © {new Date().getFullYear()} Feedback SaaS. All rights reserved.
-            </p>
-          </div>
-        </footer>
-      )}
     </>
   );
 };
