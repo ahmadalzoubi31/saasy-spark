@@ -9,7 +9,6 @@ export const createSampleFeedback = async () => {
       last_name: "User",
       email: "test@example.com",
       rating: 4,
-      status: "New",
       feedback: "This is a sample feedback entry to test the dashboard functionality."
     };
     

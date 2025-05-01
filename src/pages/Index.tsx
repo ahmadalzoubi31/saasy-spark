@@ -1,16 +1,14 @@
+
 import React, { useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/layout/PageTransition";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
 
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const pricingRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -29,19 +27,8 @@ const Index = () => {
     const elements = document.querySelectorAll(".animate-on-scroll");
     elements.forEach((el) => observer.observe(el));
 
-    const urlParams = new URLSearchParams(location.search);
-    const section = urlParams.get("section");
-    if (section) {
-      const element = document.getElementById(section);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-    }
-
     return () => observer.disconnect();
-  }, [location]);
+  }, []);
 
   const Feature = ({
     icon,
@@ -66,71 +53,10 @@ const Index = () => {
     </div>
   );
 
-  const PricingTier = ({ 
-    name, 
-    price, 
-    description, 
-    features, 
-    highlighted = false,
-    delay = 0 
-  }: { 
-    name: string; 
-    price: string; 
-    description: string; 
-    features: string[];
-    highlighted?: boolean;
-    delay?: number;
-  }) => (
-    <div 
-      className={cn(
-        "animate-on-scroll opacity-0 flex flex-col p-6 rounded-2xl shadow-lg h-full",
-        highlighted 
-          ? "border-2 border-primary bg-primary/5 relative" 
-          : "glass-panel-sm"
-      )}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {highlighted && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
-          Most Popular
-        </div>
-      )}
-      <div className="mb-5">
-        <h3 className="text-xl font-bold">{name}</h3>
-        <div className="mt-2 mb-1 flex items-baseline">
-          <span className="text-3xl font-extrabold">{price}</span>
-          {price !== "Free" && <span className="ml-1 text-muted-foreground">/month</span>}
-        </div>
-        <p className="text-muted-foreground">{description}</p>
-      </div>
-      
-      <div className="flex-grow">
-        <ul className="space-y-3 mb-6">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-start">
-              <div className="flex-shrink-0 w-5 h-5 mr-2 text-primary">
-                <Check size={20} strokeWidth={3} className="mt-0.5" />
-              </div>
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      
-      <Link to="/auth?signup=true" className="mt-auto">
-        <Button 
-          className={highlighted ? "w-full btn-primary" : "w-full"} 
-          variant={highlighted ? "default" : "outline"}
-        >
-          Get started
-        </Button>
-      </Link>
-    </div>
-  );
-
   return (
     <PageTransition>
       <div className="overflow-hidden pt-16">
+        {/* Hero Section */}
         <section
           ref={heroRef}
           className="relative pt-20 pb-32 overflow-hidden"
@@ -163,11 +89,11 @@ const Index = () => {
                     Get started for free
                   </Button>
                 </Link>
-                <button onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                <Link to="/pricing">
                   <Button variant="outline" size="lg" className="h-12 px-8">
                     View pricing
                   </Button>
-                </button>
+                </Link>
               </div>
             </div>
             
@@ -208,6 +134,7 @@ const Index = () => {
           </div>
         </section>
         
+        {/* Features Section */}
         <section
           ref={featuresRef}
           className="py-24 bg-secondary/50"
@@ -353,7 +280,7 @@ const Index = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 0121 12z"
+                      d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"
                     />
                   </svg>
                 }
@@ -365,88 +292,7 @@ const Index = () => {
           </div>
         </section>
         
-        <section
-          ref={pricingRef}
-          className="py-24 relative overflow-hidden"
-          id="pricing"
-        >
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-background via-background to-primary/5"></div>
-          <div className="absolute top-1/2 -left-64 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -z-10"></div>
-          <div className="absolute bottom-0 -right-64 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -z-10"></div>
-          
-          <div className="container">
-            <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
-              <h2 className="text-3xl font-bold mb-4">
-                Simple, transparent pricing
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Choose the perfect plan for your needs. No hidden fees or surprises.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <PricingTier
-                name="Free"
-                price="Free"
-                description="For individuals and small projects just getting started."
-                features={[
-                  "1 Project",
-                  "100 feedback entries/month",
-                  "Basic analytics",
-                  "Email support",
-                  "Widget customization"
-                ]}
-                delay={0}
-              />
-              
-              <PricingTier
-                name="Pro"
-                price="$29"
-                description="For growing businesses with more advanced needs."
-                features={[
-                  "5 Projects",
-                  "Unlimited feedback entries",
-                  "Advanced analytics",
-                  "Priority email support",
-                  "Custom branding",
-                  "Team collaboration (3 members)",
-                  "Feedback export"
-                ]}
-                highlighted={true}
-                delay={150}
-              />
-              
-              <PricingTier
-                name="Enterprise"
-                price="$99"
-                description="For large organizations requiring scalable solutions."
-                features={[
-                  "Unlimited Projects",
-                  "Unlimited feedback entries",
-                  "Enterprise analytics",
-                  "24/7 phone & email support",
-                  "Custom integrations",
-                  "Unlimited team members",
-                  "Dedicated account manager",
-                  "SLA guarantee"
-                ]}
-                delay={300}
-              />
-            </div>
-            
-            <div className="mt-16 text-center animate-on-scroll opacity-0">
-              <p className="text-muted-foreground mb-4">
-                Need a custom plan? We've got you covered.
-              </p>
-              <Link to="/contact">
-                <Button variant="outline" size="lg">
-                  Contact sales
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-        
+        {/* Call to Action */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
           <div className="absolute top-1/2 -left-64 w-[500px] h-[500px] bg-primary/20 rounded-full blur-3xl -z-10"></div>
