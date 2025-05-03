@@ -3,10 +3,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
 const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -23,11 +26,27 @@ const Navbar: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const NavItem = ({ to, label }: { to: string; label: string }) => {
-    const isActive = location.pathname === to;
+  const NavItem = ({ to, label, isSection = false }: { to: string; label: string; isSection?: boolean }) => {
+    const isActive = !isSection && location.pathname === to;
     
     return (
       <Link
@@ -38,6 +57,18 @@ const Navbar: React.FC = () => {
             ? "text-primary"
             : "text-foreground/80 hover:text-foreground hover:bg-secondary/50"
         )}
+        onClick={(e) => {
+          if (isSection) {
+            e.preventDefault();
+            const element = document.getElementById(to.substring(1));
+            if (element) {
+              window.scrollTo({
+                top: element.offsetTop - 100,
+                behavior: 'smooth'
+              });
+            }
+          }
+        }}
       >
         {label}
       </Link>
@@ -66,22 +97,34 @@ const Navbar: React.FC = () => {
         
         <nav className="hidden md:flex space-x-1 items-center">
           <NavItem to="/" label="Home" />
-          <NavItem to="/features" label="Features" />
-          <NavItem to="/pricing" label="Pricing" />
-          <NavItem to="/dashboard" label="Dashboard" />
+          <NavItem to="#features" label="Features" isSection={true} />
+          <NavItem to="#pricing" label="Pricing" isSection={true} />
+          {session ? (
+            <NavItem to="/dashboard" label="Dashboard" />
+          ) : null}
         </nav>
         
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/auth">
-            <Button variant="ghost" className="font-medium">
-              Log in
-            </Button>
-          </Link>
-          <Link to="/auth?signup=true">
-            <Button className="font-medium btn-primary">
-              Get Started
-            </Button>
-          </Link>
+          {!session ? (
+            <>
+              <Link to="/auth">
+                <Button variant="ghost" className="font-medium">
+                  Log in
+                </Button>
+              </Link>
+              <Link to="/auth?signup=true">
+                <Button className="font-medium btn-primary">
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/dashboard">
+              <Button className="font-medium btn-primary">
+                Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
         
         {/* Mobile menu button */}
@@ -115,20 +158,32 @@ const Navbar: React.FC = () => {
         <div className="absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-border/50 shadow-sm p-4 md:hidden animate-fade-in">
           <nav className="flex flex-col space-y-3">
             <NavItem to="/" label="Home" />
-            <NavItem to="/features" label="Features" />
-            <NavItem to="/pricing" label="Pricing" />
-            <NavItem to="/dashboard" label="Dashboard" />
+            <NavItem to="#features" label="Features" isSection={true} />
+            <NavItem to="#pricing" label="Pricing" isSection={true} />
+            {session ? (
+              <NavItem to="/dashboard" label="Dashboard" />
+            ) : null}
             <div className="flex flex-col gap-2 pt-3 border-t border-border/30">
-              <Link to="/auth" className="w-full">
-                <Button variant="outline" className="w-full font-medium">
-                  Log in
-                </Button>
-              </Link>
-              <Link to="/auth?signup=true" className="w-full">
-                <Button className="w-full font-medium">
-                  Get Started
-                </Button>
-              </Link>
+              {!session ? (
+                <>
+                  <Link to="/auth" className="w-full">
+                    <Button variant="outline" className="w-full font-medium">
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link to="/auth?signup=true" className="w-full">
+                    <Button className="w-full font-medium">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Link to="/dashboard" className="w-full">
+                  <Button className="w-full font-medium">
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
             </div>
           </nav>
         </div>

@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import FeedbackWidget from "@/components/FeedbackWidget";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const pricingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -53,6 +55,68 @@ const Index = () => {
     </div>
   );
 
+  const PricingTier = ({
+    name,
+    price,
+    description,
+    features,
+    cta,
+    popular = false,
+    delay = 0,
+  }: {
+    name: string;
+    price: string;
+    description: string;
+    features: string[];
+    cta: string;
+    popular?: boolean;
+    delay?: number;
+  }) => (
+    <div
+      className={cn(
+        "animate-on-scroll opacity-0 flex flex-col p-6 rounded-xl border",
+        popular
+          ? "border-primary/50 shadow-lg shadow-primary/10"
+          : "border-border"
+      )}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {popular && (
+        <div className="absolute top-0 right-0 translate-x-2 -translate-y-3">
+          <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
+            Most Popular
+          </span>
+        </div>
+      )}
+      <div className="mb-5">
+        <h3 className="text-lg font-medium">{name}</h3>
+        <div className="mt-2 flex items-baseline text-3xl font-bold">
+          {price}
+          {price !== "Free" && <span className="text-base font-medium text-muted-foreground ml-1">/mo</span>}
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">{description}</p>
+      </div>
+      <ul className="mb-6 flex-1 space-y-2">
+        {features.map((feature, idx) => (
+          <li key={idx} className="flex items-start">
+            <div className="mr-2 h-5 w-5 shrink-0 text-primary">
+              <Check className="h-5 w-5" />
+            </div>
+            <span className="text-sm">{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <Link to="/auth?signup=true" className="mt-auto">
+        <Button
+          variant={popular ? "default" : "outline"}
+          className={cn("w-full", popular && "btn-primary")}
+        >
+          {cta}
+        </Button>
+      </Link>
+    </div>
+  );
+
   return (
     <PageTransition>
       <div className="overflow-hidden pt-16">
@@ -89,11 +153,22 @@ const Index = () => {
                     Get started for free
                   </Button>
                 </Link>
-                <Link to="/pricing">
-                  <Button variant="outline" size="lg" className="h-12 px-8">
-                    View pricing
-                  </Button>
-                </Link>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="h-12 px-8"
+                  onClick={() => {
+                    const element = document.getElementById("pricing");
+                    if (element) {
+                      window.scrollTo({
+                        top: element.offsetTop - 100,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  View pricing
+                </Button>
               </div>
             </div>
             
@@ -292,6 +367,83 @@ const Index = () => {
           </div>
         </section>
         
+        {/* Pricing Section */}
+        <section 
+          ref={pricingRef}
+          className="py-24 bg-background"
+          id="pricing"
+        >
+          <div className="container">
+            <div className="max-w-2xl mx-auto text-center mb-16 animate-on-scroll opacity-0">
+              <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 text-primary mb-5">
+                Simple Pricing
+              </span>
+              <h2 className="text-3xl font-bold mb-4">
+                Choose the Perfect Plan for Your Needs
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                No hidden fees. No surprise costs. Start collecting valuable feedback today.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <PricingTier
+                name="Starter"
+                price="Free"
+                description="Perfect for individuals and early-stage startups."
+                features={[
+                  "Up to 100 feedback responses",
+                  "Basic analytics",
+                  "Widget customization",
+                  "Email support"
+                ]}
+                cta="Get Started Free"
+                delay={0}
+              />
+              
+              <PricingTier
+                name="Professional"
+                price="$49"
+                description="Ideal for growing businesses and teams."
+                features={[
+                  "Unlimited feedback responses",
+                  "Advanced analytics and reporting",
+                  "Team collaboration tools",
+                  "Multiple widgets",
+                  "API access",
+                  "Priority support"
+                ]}
+                cta="Start Free Trial"
+                popular={true}
+                delay={150}
+              />
+              
+              <PricingTier
+                name="Enterprise"
+                price="$199"
+                description="For large organizations with complex needs."
+                features={[
+                  "Everything in Professional",
+                  "Custom integrations",
+                  "White-label option",
+                  "AI sentiment analysis",
+                  "Dedicated account manager",
+                  "SLA guarantees",
+                  "24/7 phone support"
+                ]}
+                cta="Contact Sales"
+                delay={300}
+              />
+            </div>
+            
+            <div className="mt-16 text-center animate-on-scroll opacity-0">
+              <p className="text-muted-foreground">
+                Need a custom plan? <Link to="/contact" className="text-primary font-medium">Contact us</Link> for tailored solutions.
+              </p>
+            </div>
+          </div>
+        </section>
+        
         {/* Call to Action */}
         <section className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
@@ -317,6 +469,20 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Footer */}
+        <div className="py-6 border-t border-border/50">
+          <div className="container">
+            <div className="flex justify-center items-center text-sm text-muted-foreground">
+              <p className="flex items-center gap-2">
+                Built by Ahmad in 3 days 
+                <span className="inline-block animate-pulse">
+                  ⚡
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </PageTransition>
   );

@@ -19,7 +19,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="relative">
+          <div className="relative min-h-screen">
             <Routes>
               <Route
                 path="/"
