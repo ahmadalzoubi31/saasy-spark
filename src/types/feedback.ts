@@ -10,7 +10,7 @@ export interface Feedback {
   url?: string;
   user_agent?: string;
   created_at: string;
-  status?: string;
+  status: string;
 }
 
 export interface FeedbackReply {

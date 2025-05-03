@@ -259,6 +259,8 @@ const Dashboard = () => {
   
   const handleMarkAsResolved = async (feedbackId: string) => {
     try {
+      console.log("Marking feedback as resolved:", feedbackId);
+      
       // Update the feedback status to "Resolved"
       const { data, error } = await supabase
         .from('feedback')
@@ -266,14 +268,17 @@ const Dashboard = () => {
         .eq('id', feedbackId)
         .select();
         
-      if (error) throw error;
-      
-      // Update local state
-      if (data && data.length > 0) {
-        setFeedbackData(prev => 
-          prev.map(item => item.id === feedbackId ? data[0] as Feedback : item)
-        );
+      if (error) {
+        console.error('Error marking as resolved:', error);
+        throw error;
       }
+      
+      console.log("Response from marking resolved:", data);
+      
+      // Update local state - important to create a new array
+      setFeedbackData(prev => 
+        prev.map(item => item.id === feedbackId ? {...item, status: 'Resolved'} : item)
+      );
       
       toast.success("Feedback marked as resolved");
     } catch (error) {
@@ -282,9 +287,11 @@ const Dashboard = () => {
     }
   };
   
-  // New function to change feedback status
+  // Updated function to change feedback status
   const handleChangeStatus = async (feedbackId: string, newStatus: string) => {
     try {
+      console.log(`Changing status of feedback ${feedbackId} to ${newStatus}`);
+      
       // Update the feedback status
       const { data, error } = await supabase
         .from('feedback')
@@ -292,14 +299,17 @@ const Dashboard = () => {
         .eq('id', feedbackId)
         .select();
         
-      if (error) throw error;
-      
-      // Update local state
-      if (data && data.length > 0) {
-        setFeedbackData(prev => 
-          prev.map(item => item.id === feedbackId ? data[0] as Feedback : item)
-        );
+      if (error) {
+        console.error('Error changing status:', error);
+        throw error;
       }
+      
+      console.log("Response from changing status:", data);
+      
+      // Update local state with a new array to trigger re-render
+      setFeedbackData(prev => 
+        prev.map(item => item.id === feedbackId ? {...item, status: newStatus} : item)
+      );
       
       toast.success(`Feedback status changed to ${newStatus}`);
     } catch (error) {
