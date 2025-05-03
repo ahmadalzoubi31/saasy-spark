@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -262,18 +261,17 @@ const Dashboard = () => {
       console.log("Marking feedback as resolved:", feedbackId);
       
       // Update the feedback status to "Resolved"
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('feedback')
         .update({ status: 'Resolved' })
-        .eq('id', feedbackId)
-        .select();
+        .eq('id', feedbackId);
         
       if (error) {
         console.error('Error marking as resolved:', error);
         throw error;
       }
       
-      console.log("Response from marking resolved:", data);
+      console.log("Successfully marked as resolved in database");
       
       // Update local state - important to create a new array
       setFeedbackData(prev => 
@@ -293,18 +291,17 @@ const Dashboard = () => {
       console.log(`Changing status of feedback ${feedbackId} to ${newStatus}`);
       
       // Update the feedback status
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('feedback')
         .update({ status: newStatus })
-        .eq('id', feedbackId)
-        .select();
+        .eq('id', feedbackId);
         
       if (error) {
         console.error('Error changing status:', error);
         throw error;
       }
       
-      console.log("Response from changing status:", data);
+      console.log("Successfully updated status in database");
       
       // Update local state with a new array to trigger re-render
       setFeedbackData(prev => 
@@ -573,7 +570,7 @@ const Dashboard = () => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                        d="M15 19.128a9.38 9.38 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
                   </CardHeader>
