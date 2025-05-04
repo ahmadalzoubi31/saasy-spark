@@ -63,7 +63,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) throw error;
-      setApiKey(data.api_key);
+      
+      // Check if data exists and has api_key property
+      if (data && 'api_key' in data) {
+        setApiKey(data.api_key);
+      }
     } catch (error) {
       console.error('Error fetching API key:', error);
     }
