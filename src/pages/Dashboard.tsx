@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -748,3 +749,442 @@ const Dashboard = () => {
                                     variant="outline" 
                                     size="sm"
                                     onClick={() => handleMarkAsResolved(feedback.id)}
+                                  >
+                                    Mark as Resolved
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {replies.length > 0 && (
+                              <div className="pl-8 mt-2 space-y-2">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                  Replies
+                                </p>
+                                {replies.map(reply => (
+                                  <div key={reply.id} className="bg-muted/50 p-2 rounded">
+                                    <p className="text-xs">{reply.message}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {formatDate(reply.created_at)}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="feedback" className="space-y-6">
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>All Feedback</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="flex justify-center items-center py-8">
+                      <svg
+                        className="animate-spin h-8 w-8 text-primary"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    </div>
+                  ) : feedbackData.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No feedback received yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>User</TableHead>
+                            <TableHead>Rating</TableHead>
+                            <TableHead>Feedback</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {feedbackData.map((feedback) => (
+                            <TableRow key={feedback.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="h-7 w-7">
+                                    <AvatarFallback>
+                                      {feedback.first_name.charAt(0) + feedback.last_name.charAt(0)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="text-sm font-medium">{feedback.first_name} {feedback.last_name}</p>
+                                    <p className="text-xs text-muted-foreground">{feedback.email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <RatingStars rating={feedback.rating} />
+                              </TableCell>
+                              <TableCell>
+                                <div className="max-w-[200px] truncate">
+                                  {feedback.feedback}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <p className="text-sm">{formatDate(feedback.created_at)}</p>
+                              </TableCell>
+                              <TableCell>
+                                <StatusBadge status={feedback.status} />
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleReplyClick(feedback)}
+                                  >
+                                    Reply
+                                  </Button>
+                                  
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                      >
+                                        Status
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleChangeStatus(feedback.id, "New")}
+                                      >
+                                        New
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleChangeStatus(feedback.id, "Reviewed")}
+                                      >
+                                        Reviewed
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleChangeStatus(feedback.id, "In Progress")}
+                                      >
+                                        In Progress
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={() => handleChangeStatus(feedback.id, "Resolved")}
+                                      >
+                                        Resolved
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="widget" className="space-y-6">
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>Widget Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="productName">Product Name</Label>
+                      <Input
+                        id="productName"
+                        value={widgetSettings.productName}
+                        onChange={(e) =>
+                          handleWidgetSettingChange("productName", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Widget Position</Label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant={
+                            widgetSettings.position === "bottom-right"
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() =>
+                            handleWidgetSettingChange("position", "bottom-right")
+                          }
+                        >
+                          Bottom Right
+                        </Button>
+                        <Button
+                          variant={
+                            widgetSettings.position === "bottom-left"
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() =>
+                            handleWidgetSettingChange("position", "bottom-left")
+                          }
+                        >
+                          Bottom Left
+                        </Button>
+                        <Button
+                          variant={
+                            widgetSettings.position === "top-right" ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() =>
+                            handleWidgetSettingChange("position", "top-right")
+                          }
+                        >
+                          Top Right
+                        </Button>
+                        <Button
+                          variant={
+                            widgetSettings.position === "top-left" ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() =>
+                            handleWidgetSettingChange("position", "top-left")
+                          }
+                        >
+                          Top Left
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="darkMode">Dark Mode</Label>
+                      <input
+                        id="darkMode"
+                        type="checkbox"
+                        checked={widgetSettings.darkMode}
+                        onChange={(e) =>
+                          handleWidgetSettingChange("darkMode", e.target.checked)
+                        }
+                        className="ml-2"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={handleRefreshWidget}>
+                      Refresh
+                    </Button>
+                    <Button onClick={handleSaveWidgetSettings}>
+                      Save Settings
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>Installation Code</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-muted/50 p-4 rounded-md">
+                    <code className="text-sm">
+                      {getWidgetInstallationCode()}
+                    </code>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Copy and paste this code snippet into your website to install the
+                    feedback widget.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>Widget Preview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative h-[400px] w-full border rounded-lg bg-muted/30 flex items-center justify-center">
+                    <p className="text-muted-foreground">Preview area</p>
+                    <div className="absolute inset-0">
+                      <FeedbackWidget
+                        key={refreshKey}
+                        position={widgetSettings.position}
+                        darkMode={widgetSettings.darkMode}
+                        productName={widgetSettings.productName}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="settings" className="space-y-6">
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>Account Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input id="name" defaultValue="John Doe" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" defaultValue="john@example.com" type="email" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="company">Company</Label>
+                      <Input id="company" defaultValue="Acme Inc" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button>Save Changes</Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>Notification Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="emailNotifications">Email Notifications</Label>
+                      <input
+                        id="emailNotifications"
+                        type="checkbox"
+                        defaultChecked
+                        className="ml-2"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="slackNotifications">Slack Notifications</Label>
+                      <input id="slackNotifications" type="checkbox" className="ml-2" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="weeklyDigest">Weekly Digest</Label>
+                      <input
+                        id="weeklyDigest"
+                        type="checkbox"
+                        defaultChecked
+                        className="ml-2"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button>Save Changes</Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-panel-sm">
+                <CardHeader>
+                  <CardTitle>API Keys</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label>Production API Key</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        className="font-mono"
+                        defaultValue="sk_prod_123456789abcdefghijklmnopqrstuvwxyz"
+                        type="password"
+                      />
+                      <Button variant="outline">Show</Button>
+                      <Button variant="outline">Copy</Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label>Development API Key</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        className="font-mono"
+                        defaultValue="sk_dev_123456789abcdefghijklmnopqrstuvwxyz"
+                        type="password"
+                      />
+                      <Button variant="outline">Show</Button>
+                      <Button variant="outline">Copy</Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button variant="destructive">Rotate API Keys</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
+      
+      <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reply to Feedback</DialogTitle>
+            <DialogDescription>
+              {currentFeedback && (
+                <div className="mt-2">
+                  <p className="text-sm mb-1">
+                    <span className="font-medium">From:</span>{" "}
+                    {currentFeedback.first_name} {currentFeedback.last_name}
+                  </p>
+                  <p className="text-sm mb-2">
+                    <span className="font-medium">Message:</span>{" "}
+                    {currentFeedback.feedback}
+                  </p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Textarea
+              placeholder="Type your reply here..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReplyDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendReply}>Send Reply</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </PageTransition>
+  );
+};
+
+export default Dashboard;
