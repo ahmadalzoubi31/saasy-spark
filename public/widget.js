@@ -277,7 +277,8 @@
               feedback: feedbackText,
               product_name: config.productName,
               url: window.location.href,
-              user_agent: navigator.userAgent
+              user_agent: navigator.userAgent,
+              api_key: config.apiKey // Add the API key to the feedback data
             };
             
             // Submit feedback to Supabase

@@ -11,6 +11,7 @@ export interface Feedback {
   user_agent?: string;
   created_at: string;
   status: string;
+  api_key?: string;
 }
 
 export interface FeedbackReply {

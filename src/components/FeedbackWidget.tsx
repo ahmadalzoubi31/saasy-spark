@@ -62,7 +62,8 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
       feedback: feedback,
       product_name: productName,
       url: window.location.href,
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      api_key: apiKey // Add the API key to the feedback data
     };
     
     try {
