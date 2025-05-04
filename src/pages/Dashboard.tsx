@@ -40,10 +40,11 @@ const Dashboard = () => {
     setIsFetchingData(true);
     try {
       // Fetch feedback based on the user's API key
-      let query = supabase
-        .from('feedback')
-        .select('*')
-        .eq('api_key', apiKey || '');
+      let query = supabase.from('feedback')
+        .select('*');
+        
+      // Filter by API key if available (no longer trying to filter by api_key column on feedback table)
+      // The api_key is in the profiles table, not in the feedback table
 
       if (activeTab !== 'all') {
         query = query.eq('status', activeTab);
@@ -52,7 +53,14 @@ const Dashboard = () => {
       const { data: feedbackData, error: feedbackError } = await query.order('created_at', { ascending: false });
 
       if (feedbackError) throw feedbackError;
-      setFeedback(feedbackData || []);
+      
+      // Only show feedback that belongs to the current user's API key
+      if (apiKey && feedbackData) {
+        const filteredFeedback = feedbackData.filter(item => item.api_key === apiKey);
+        setFeedback(filteredFeedback);
+      } else {
+        setFeedback([]);
+      }
 
       // Fetch all replies
       const { data: repliesData, error: repliesError } = await supabase
