@@ -137,7 +137,7 @@ const Dashboard = () => {
   }, []);
 
   const StatusBadge = ({ status }: { status: string }) => {
-    // Display the actual status from the database without modifying it
+    // Display the status from the database
     const getStatusColor = () => {
       switch (status) {
         case "New":
@@ -268,7 +268,7 @@ const Dashboard = () => {
       
       console.log("Successfully marked as resolved in database");
       
-      // Update local state - important to create a new array
+      // Update local state - create a new array to trigger re-render
       setFeedbackData(prev => 
         prev.map(item => item.id === feedbackId ? {...item, status: 'Resolved'} : item)
       );
@@ -280,12 +280,12 @@ const Dashboard = () => {
     }
   };
   
-  // Updated function to change feedback status
+  // Function to change feedback status
   const handleChangeStatus = async (feedbackId: string, newStatus: string) => {
     try {
       console.log(`Changing status of feedback ${feedbackId} to ${newStatus}`);
       
-      // Update the feedback status
+      // Update the feedback status in the database
       const { error } = await supabase
         .from('feedback')
         .update({ status: newStatus })
@@ -447,7 +447,6 @@ const Dashboard = () => {
                 <p>{fetchError}</p>
               </div>
             )}
-            
             
             <TabsContent value="overview" className="space-y-8">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -827,81 +826,106 @@ const Dashboard = () => {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {feedbackData.map((feedback) => (
-                            <TableRow key={feedback.id}>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="h-7 w-7">
-                                    <AvatarFallback>
-                                      {feedback.first_name.charAt(0) + feedback.last_name.charAt(0)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="text-sm font-medium">{feedback.first_name} {feedback.last_name}</p>
-                                    <p className="text-xs text-muted-foreground">{feedback.email}</p>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <RatingStars rating={feedback.rating} />
-                              </TableCell>
-                              <TableCell>
-                                <div className="max-w-[200px] truncate">
-                                  {feedback.feedback}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <p className="text-sm">{formatDate(feedback.created_at)}</p>
-                              </TableCell>
-                              <TableCell>
-                                <StatusBadge status={feedback.status} />
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => handleReplyClick(feedback)}
-                                  >
-                                    Reply
-                                  </Button>
-                                  
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
+                          {feedbackData.map((feedback) => {
+                            const replies = getFeedbackReplies(feedback.id);
+                            
+                            return (
+                              <React.Fragment key={feedback.id}>
+                                <TableRow>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-7 w-7">
+                                        <AvatarFallback>
+                                          {feedback.first_name.charAt(0) + feedback.last_name.charAt(0)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="text-sm font-medium">{feedback.first_name} {feedback.last_name}</p>
+                                        <p className="text-xs text-muted-foreground">{feedback.email}</p>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <RatingStars rating={feedback.rating} />
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="max-w-[200px] truncate">
+                                      {feedback.feedback}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <p className="text-sm">{formatDate(feedback.created_at)}</p>
+                                  </TableCell>
+                                  <TableCell>
+                                    <StatusBadge status={feedback.status} />
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
                                       <Button 
                                         variant="outline" 
                                         size="sm"
+                                        onClick={() => handleReplyClick(feedback)}
                                       >
-                                        Status
+                                        Reply
                                       </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleChangeStatus(feedback.id, "New")}
-                                      >
-                                        New
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleChangeStatus(feedback.id, "Reviewed")}
-                                      >
-                                        Reviewed
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleChangeStatus(feedback.id, "In Progress")}
-                                      >
-                                        In Progress
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={() => handleChangeStatus(feedback.id, "Resolved")}
-                                      >
-                                        Resolved
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                      
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                          >
+                                            Status
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                          <DropdownMenuItem 
+                                            onClick={() => handleChangeStatus(feedback.id, "New")}
+                                          >
+                                            New
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem 
+                                            onClick={() => handleChangeStatus(feedback.id, "Reviewed")}
+                                          >
+                                            Reviewed
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem 
+                                            onClick={() => handleChangeStatus(feedback.id, "In Progress")}
+                                          >
+                                            In Progress
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem 
+                                            onClick={() => handleChangeStatus(feedback.id, "Resolved")}
+                                          >
+                                            Resolved
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                                {replies.length > 0 && (
+                                  <TableRow className="bg-muted/30">
+                                    <TableCell colSpan={6} className="p-0">
+                                      <div className="pl-10 pr-4 py-2 space-y-2">
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                          Replies
+                                        </p>
+                                        {replies.map(reply => (
+                                          <div key={reply.id} className="bg-muted/50 p-2 rounded">
+                                            <p className="text-xs">{reply.message}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                              {formatDate(reply.created_at)}
+                                            </p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
